@@ -92,6 +92,7 @@ class tool_panel_blend(bpy.types.Panel):
     layout = self.layout
     layout.operator('blend.save_backup'             , text = 'Save Backup'            , icon = 'SAVE_COPY'          )
     layout.operator('scene.unpack_images'           , text = 'Unpack Images'          , icon = 'IMAGE_COL'          )
+    
 
 
 class tool_panel_scene(bpy.types.Panel):
@@ -127,6 +128,18 @@ class tool_panel_object(bpy.types.Panel):
     row = layout.row()
     row.operator('object.layered_transfer_copy'     , text = 'Layered Transfer COPY'   , icon = 'COPYDOWN'           )
     row.operator('object.layered_transfer_paste'    , text = 'Layered Transfer PASTE'  , icon = 'PASTEDOWN'          )
+
+class tool_panel_updater(bpy.types.Panel):
+  bl_space_type = 'VIEW_3D'
+  bl_region_type = 'TOOLS'
+  bl_category = 'V-tools'
+  bl_label = 'V-tools - Update'
+  bl_idname = 'tool_panel_update'
+
+  def draw(self,context):
+    layout = self.layout
+    addon_updater_ops.check_for_update_background(context)
+    addon_updater_ops.update_notice_box_ui(self, context)
 
 
 
@@ -299,6 +312,7 @@ def register():
   bpy.utils.register_class(tool_panel_blend)
   bpy.utils.register_class(tool_panel_scene)
   bpy.utils.register_class(tool_panel_object)
+  bpy.utils.register_class(tool_panel_updater)
   bpy.utils.register_class(render_panel)
   bpy.utils.register_class(render_layer_panel)
   bpy.utils.register_class(object_panel)
@@ -330,6 +344,7 @@ def unregister():
   bpy.utils.unregister_class(tool_panel_blend)
   bpy.utils.unregister_class(tool_panel_scene)
   bpy.utils.unregister_class(tool_panel_object)
+  bpy.utils.unregister_class(tool_panel_updater)
   bpy.utils.unregister_class(render_panel)
   bpy.utils.unregister_class(render_layer_panel)
   bpy.utils.unregister_class(object_panel)
