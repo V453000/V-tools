@@ -3,7 +3,7 @@ bl_info = {
     'author': 'V453000',
     'description': 'Various tools.',
     'category': 'User',
-    'version': (0, 1, 4),
+    'version': (0, 1, 5),
     'blender': (2, 7, 9)
 }
 
@@ -139,6 +139,8 @@ class tool_panel_updater(bpy.types.Panel):
   def draw(self,context):
     layout = self.layout
     addon_updater_ops.check_for_update_background(context)
+    if addon_updater_ops.updater.update_ready = True:
+      layout.label('A new version of V-Tools is available!', icon ='RADIO')
     addon_updater_ops.update_notice_box_ui(self, context)
 
 
