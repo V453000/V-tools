@@ -1,5 +1,5 @@
 bl_info = {
-    'name': 'V-Tools',
+    'name': 'V-tools',
     'author': 'V453000',
     'description': 'Various tools.',
     'category': 'User',
@@ -8,6 +8,9 @@ bl_info = {
 }
 
 import bpy
+
+from . import addon_updater_ops
+
 from bpy.props import (StringProperty,
                        BoolProperty,
                        IntProperty,
@@ -70,7 +73,7 @@ delete_from_all_scenes =  Vtools_delete_from_all_scenes.delete_from_all_scenes
 save_backup =             Vtools_save_backup.save_backup
 layered_transfer_copy =   Vtools_layered_transfer_copy.layered_transfer_copy
 layered_transfer_paste =  Vtools_layered_transfer_paste.layered_transfer_paste
-link_material_to =           Vtools_link_material_to.link_material_to
+link_material_to =        Vtools_link_material_to.link_material_to
 
 
 
@@ -81,8 +84,8 @@ link_material_to =           Vtools_link_material_to.link_material_to
 class tool_panel_blend(bpy.types.Panel):
   bl_space_type = 'VIEW_3D'
   bl_region_type = 'TOOLS'
-  bl_category = 'V-Tools'
-  bl_label = 'V-Tools - Blend file'
+  bl_category = 'V-tools'
+  bl_label = 'V-tools - Blend file'
   bl_idname = 'tool_panel_blend'
 
   def draw(self,context):
@@ -94,8 +97,8 @@ class tool_panel_blend(bpy.types.Panel):
 class tool_panel_scene(bpy.types.Panel):
   bl_space_type = 'VIEW_3D'
   bl_region_type = 'TOOLS'
-  bl_category = 'V-Tools'
-  bl_label = 'V-Tools - Scene'
+  bl_category = 'V-tools'
+  bl_label = 'V-tools - Scene'
   bl_idname = 'tool_panel_scene'
 
   def draw(self,context):
@@ -106,8 +109,8 @@ class tool_panel_scene(bpy.types.Panel):
 class tool_panel_object(bpy.types.Panel):
   bl_space_type = 'VIEW_3D'
   bl_region_type = 'TOOLS'
-  bl_category = 'V-Tools'
-  bl_label = 'V-Tools - Object'
+  bl_category = 'V-tools'
+  bl_label = 'V-tools - Object'
   bl_idname = 'tool_panel_object'
 
   def draw(self,context):
@@ -145,8 +148,8 @@ class render_panel(bpy.types.Panel):
   bl_space_type = 'PROPERTIES'
   bl_region_type = 'WINDOW'
   bl_context = 'render'
-  bl_category = 'V-Tools-render'
-  bl_label = 'V-Tools-render'
+  bl_category = 'V-tools-render'
+  bl_label = 'V-tools-render'
   bl_idname = 'render_panel_layout'
 
   def draw(self,context):
@@ -159,8 +162,8 @@ class render_layer_panel(bpy.types.Panel):
   bl_space_type = 'PROPERTIES'
   bl_region_type = 'WINDOW'
   bl_context = 'render_layer'
-  bl_category = 'V-Tools-render-layers'
-  bl_label = 'V-Tools-render-layers'
+  bl_category = 'V-tools-render-layers'
+  bl_label = 'V-tools-render-layers'
   bl_idname = 'render_layer_panel_layout'
 
   def draw(self,context):
@@ -171,8 +174,8 @@ class material_panel(bpy.types.Panel):
   bl_space_type = 'PROPERTIES'
   bl_region_type = 'WINDOW'
   bl_context = 'material'
-  bl_category = 'V-Tools-material'
-  bl_label = 'V-Tools-material'
+  bl_category = 'V-tools-material'
+  bl_label = 'V-tools-material'
   bl_idname = 'material_panel_layout'
 
   def draw(self,context):
@@ -187,8 +190,8 @@ class object_panel(bpy.types.Panel):
   bl_space_type = 'PROPERTIES'
   bl_region_type = 'WINDOW'
   bl_context = 'object'
-  bl_category = 'V-Tools-object'
-  bl_label = 'V-Tools-object'
+  bl_category = 'V-tools-object'
+  bl_label = 'V-tools-object'
   bl_idname = 'object_panel_layout'
 
   def draw(self,context):
@@ -208,8 +211,8 @@ class modifier_panel(bpy.types.Panel):
   bl_space_type = 'PROPERTIES'
   bl_region_type = 'WINDOW'
   bl_context = 'modifier'
-  bl_category = 'V-Tools-modifier'
-  bl_label = 'V-Tools-modifier'
+  bl_category = 'V-tools-modifier'
+  bl_label = 'V-tools-modifier'
   bl_idname = 'modifier_panel_layout'
 
   def draw(self,context):
@@ -221,17 +224,60 @@ class data_panel(bpy.types.Panel):
   bl_space_type = 'PROPERTIES'
   bl_region_type = 'WINDOW'
   bl_context = 'data'
-  bl_category = 'V-Tools-data'
-  bl_label = 'V-Tools-data'
+  bl_category = 'V-tools-data'
+  bl_label = 'V-tools-data'
   bl_idname = 'data_panel_layout'
 
   def draw(self,context):
     layout = self.layout
     layout.operator('object.link_mesh_data'      , text = 'Link Identical Mesh Data'         , icon = 'MOD_TRIANGULATE'    )
 
+class VTools_preferences(bpy.types.AddonPreferences):
+  bl_idname = __package__
 
+  # addon updater preferences from `__init__`, be sure to copy all of them
+  auto_check_update = bpy.props.BoolProperty(
+    name = "Auto-check for Update",
+    description = "If enabled, auto-check for updates using an interval",
+    default = False,
+  )
+  updater_intrval_months = bpy.props.IntProperty(
+    name='Months',
+    description = "Number of months between checking for updates",
+    default=0,
+    min=0
+  )
+  updater_intrval_days = bpy.props.IntProperty(
+    name='Days',
+    description = "Number of days between checking for updates",
+    default=7,
+    min=0,
+  )
+  updater_intrval_hours = bpy.props.IntProperty(
+    name='Hours',
+    description = "Number of hours between checking for updates",
+    default=0,
+    min=0,
+    max=23
+  )
+  updater_intrval_minutes = bpy.props.IntProperty(
+    name='Minutes',
+    description = "Number of minutes between checking for updates",
+    default=0,
+    min=0,
+    max=59
+  )
+
+  def draw(self, context):
+    layout = self.layout
+    addon_updater_ops.update_settings_ui(self, context)
 
 def register():
+
+  # Auto updater
+  addon_updater_ops.register(bl_info)
+  bpy.utils.register_class(VTools_preferences)
+
   # Operators
   bpy.utils.register_class(object_draw_mode)
   bpy.utils.register_class(generate_render_nodes)
@@ -262,6 +308,7 @@ def register():
 
 
 def unregister():
+
   # Operators
   bpy.utils.unregister_class(object_draw_mode)
   bpy.utils.unregister_class(generate_render_nodes)
