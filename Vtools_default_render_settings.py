@@ -233,8 +233,8 @@ class default_render_settings(bpy.types.Operator):
       # Render tile size
       if self.set_automatic_render_tile_size == True:
         if self.set_render_engine == 'CYCLES' and self.set_render_device == 'GPU':
-          scn.render.tile_x = self.set_resolution_x
-          scn.render.tile_y = self.set_resolution_y
+          scn.render.tile_x = scn.render.resolution_x
+          scn.render.tile_y = scn.render.resolution_x
         else:
           scn.render.tile_x = 32
           scn.render.tile_y = 32
