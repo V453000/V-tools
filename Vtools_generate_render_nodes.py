@@ -6,6 +6,8 @@ class generate_render_nodes(bpy.types.Operator):
   bl_label = 'Generate Render Nodes'
   bl_options = {'REGISTER', 'UNDO'}
 
+
+
   AO_identifier_use = bpy.props.BoolProperty(
     name = 'Use AO',
     description = 'Save AO pass from specified RenderLayers to individual folder.',
@@ -24,6 +26,8 @@ class generate_render_nodes(bpy.types.Operator):
     description = 'Suffix or appendix in the name of RenderLayer for rendering AO.',
     default = 'main'
   )
+
+
   shadow_identifier_use = bpy.props.BoolProperty(
     name = 'Use Shadow',
     description = 'Save Shadow pass from specified RenderLayers to individual folder.',
@@ -31,7 +35,7 @@ class generate_render_nodes(bpy.types.Operator):
   )
   shadow_identifier_position = bpy.props.EnumProperty(
     name = 'Shadow Identifier position',
-    description = 'Select where in the RenderLayer name is the AO identifier.',
+    description = 'Select where in the RenderLayer name is the Shadow identifier.',
     items = [
       ('back', 'back',''),
       ('front', 'front','')
@@ -42,6 +46,29 @@ class generate_render_nodes(bpy.types.Operator):
     description = 'Suffix or appendix in the name of RenderLayer for rendering Shadow.',
     default = 'shadow'
   )
+  
+
+  height_identifier_use = bpy.props.BoolProperty(
+    name = 'Use Height',
+    description = 'Save Height pass from specified RenderLayers to individual folder.',
+    default = True
+  )
+  height_identifier_position = bpy.props.EnumProperty(
+    name = 'Height Identifier position',
+    description = 'Select where in the RenderLayer name is the Height identifier.',
+    items = [
+      ('back', 'back',''),
+      ('front', 'front','')
+    ]
+  )
+  height_identifier = bpy.props.StringProperty(
+    name = 'Height Identifier',
+    description = 'Suffix or appendix in the name of RenderLayer for rendering Height.',
+    default = 'height'
+  )
+
+
+
   remove_existing_nodes = bpy.props.BoolProperty(
     name = 'Remove Existing Nodes',
     description = 'Choose whether the function should remove existing nodes, or only add new.',
@@ -63,6 +90,7 @@ class generate_render_nodes(bpy.types.Operator):
 
     appendix_AO =     self.AO_identifier #'main'
     appendix_shadow = self.shadow_identifier #'shadow' 
+    appendix_height = self.height_identifier #'height' 
 
     # ------------------------------------------------------------------------
     # ------------------------------------------------------------------------
@@ -81,12 +109,78 @@ class generate_render_nodes(bpy.types.Operator):
       print(render_layer.name)
       render_layer_list.append(render_layer.name)
 
-    # make sure AO render layers have AO on, and shadow render layers have shadow on
+
+
+
+
+
+
+
+
+    # check if HEIGHT material exists, if not, create it
+    if bpy.data.materials.get('HEIGHT') is None:
+      # create new HEIGHT material
+      print('HEIGHT material does not exist, creating...')
+      height_mtl = bpy.data.materials.new('HEIGHT')
+      height_mtl.use_nodes = True
+      height_nodes = height_mtl.node_tree.nodes
+      # remove all nodes first
+      for node in height_nodes:
+        height_nodes.remove(node)
+      
+      # create new nodes
+      geometry_node = height_nodes.new(type = 'ShaderNodeNewGeometry')
+      geometry_node.name = 'HEIGHT-Geometry'
+      geometry_node.label = geometry_node.name
+      geometry_node.location = (-400,0)
+      
+      mapping_node = height_nodes.new(type = 'ShaderNodeMapping')
+      mapping_node.name = 'HEIGHT-Mapping'
+      mapping_node.label = mapping_node.name
+      mapping_node.location = (-200,0)
+      mapping_node.scale[2] = 0.1
+
+      separateXYZ_node = height_nodes.new(type = 'ShaderNodeSeparateXYZ')
+      separateXYZ_node.name = 'HEIGHT-SeparateXYZ'
+      separateXYZ_node.label = separateXYZ_node.name
+      separateXYZ_node.location = (180,0)
+
+      emission_node = height_nodes.new(type = 'ShaderNodeEmission')
+      emission_node.name = 'HEIGHT-Emission'
+      emission_node.label = emission_node.name
+      emission_node.location = (380,0)
+
+      material_output = height_nodes.new(type = 'ShaderNodeOutputMaterial')
+      material_output.name = 'HEIGHT-MaterialOutput'
+      material_output.label = material_output.name
+      material_output.location = (580,0)
+
+      height_mtl.node_tree.links.new(geometry_node.outputs[0], mapping_node.inputs[0])
+      height_mtl.node_tree.links.new(mapping_node.outputs[0], separateXYZ_node.inputs[0])
+      height_mtl.node_tree.links.new(separateXYZ_node.outputs[2], emission_node.inputs[0])
+      height_mtl.node_tree.links.new(emission_node.outputs[0], material_output.inputs[0])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # make sure AO render layers have AO on, and shadow render layers have shadow on and height layers have height material override
     appendix_AO_char_count = len(appendix_AO)
     appendix_shadow_char_count = len(appendix_shadow)
+    appendix_height_char_count = len(appendix_height)
 
     for render_layer in bpy.context.scene.render.layers:
       render_layer_name = render_layer.name
+      
       if self.AO_identifier_position == 'back':
         render_layer_appendix_AO = render_layer_name[-appendix_AO_char_count:]
       if self.AO_identifier_position == 'front':
@@ -97,18 +191,29 @@ class generate_render_nodes(bpy.types.Operator):
       if self.shadow_identifier_position == 'front':
         render_layer_appendix_shadow = render_layer_name[:appendix_shadow_char_count]
 
+      if self.height_identifier_position == 'back':
+        render_layer_appendix_height = render_layer_name[-appendix_height_char_count:]
+      if self.height_identifier_position == 'front':
+        render_layer_appendix_height = render_layer_name[:appendix_height_char_count]
+
 
       if render_layer_appendix_AO == appendix_AO:
         print('AO appendix detected')
         if render_layer.use_pass_ambient_occlusion == False:
-          print(str(render_layer_name) + ' has appendix "' + appendix_AO + '" but does not have AO pass activated. Activating AO pass...')
+          print(str(render_layer_name) + ' has appendix "' + appendix_AO + '" but does not have AO pass activated. Activating...')
           render_layer.use_pass_ambient_occlusion = True
       
       if render_layer_appendix_shadow == appendix_shadow:
         print('shadow appendix detected')
         if render_layer.use_pass_shadow == False:
-          print(str(render_layer_name) + ' has appendix "' + appendix_shadow + '" but does not have shadow pass activated. Activating shadow pass...')
+          print(str(render_layer_name) + ' has appendix "' + appendix_shadow + '" but does not have shadow pass activated. Activating...')
           render_layer.use_pass_shadow = True
+      
+      if render_layer_appendix_height == appendix_height:
+        print('height appendix detected')
+        if render_layer.material_override != bpy.data.materials['HEIGHT']:
+          print(str(render_layer_name) + ' has appendix "' + appendix_height + '" but does not have HEIGHT material override activated. Activating...')
+          render_layer.material_override = bpy.data.materials['HEIGHT']
 
 
 
@@ -148,21 +253,6 @@ class generate_render_nodes(bpy.types.Operator):
 
 
 
-    # check if HEIGHT material exists, if not, create it
-    if bpy.data.materials.get('HEIGHT') is None:
-      # create new HEIGHT material
-      print('HEIGHT material does not exist, creating...')
-      height_mtl = bpy.data.materials.new('HEIGHT')
-      height_mtl.use_nodes = True
-      height_nodes = height_mtl.node_tree.nodes
-      # remove all nodes first
-      for node in height_nodes:
-        height_nodes.remove(node)
-      
-      # create new nodes
-      geometry_node = height_nodes.new(type = 'ShaderNodeNewGeometry')
-      
-
 
 
     # switch scene to destination and make sure nodes are allowed
@@ -186,6 +276,8 @@ class generate_render_nodes(bpy.types.Operator):
       render_layer_is_AO = False
       render_layer_is_shadow = False
 
+
+      # shadow appendix or suffix
       appendix_or_suffix_shadow = -1 # -1 for appendix, 1 for suffix
       if self.shadow_identifier_position == 'front':
         appendix_or_suffix_shadow = 1
