@@ -73,7 +73,7 @@ class generate_render_nodes(bpy.types.Operator):
 
     # read Render Layers
     # switch scene to source
-    bpy.data.context.scene = bpy.data.scenes[render_layers_from_scene]
+    bpy.context.screen.scene = bpy.data.scenes[render_layers_from_scene]
     # go through render layers and add them to a list
     render_layer_list = []
     print('Reading render layers:')
@@ -166,7 +166,7 @@ class generate_render_nodes(bpy.types.Operator):
 
 
     # switch scene to destination and make sure nodes are allowed
-    bpy.data.context.scene = bpy.data.scenes[render_nodes_to_scene]
+    bpy.context.screen.scene = bpy.data.scenes[render_nodes_to_scene]
     bpy.context.scene.use_nodes = True
 
     # clear all current composite nodes (mainly for debug)
@@ -295,7 +295,7 @@ class generate_render_nodes(bpy.types.Operator):
 
       
       # link the nodes
-      bpy.context.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
+      bpy.context.screen.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
 
       print(render_layer_name)
 
@@ -305,7 +305,7 @@ class generate_render_nodes(bpy.types.Operator):
     #                                                                                                       #
     # ----------------------------------------------------------------------------------------------------- #
     if self.generate_postprocessing == True:
-      
+      print('Hello dear user.')
 
 
 
