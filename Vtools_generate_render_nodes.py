@@ -24,8 +24,6 @@ class generate_render_nodes(bpy.types.Operator):
     description = 'Suffix or appendix in the name of RenderLayer for rendering AO.',
     default = 'main'
   )
-  
-
   shadow_identifier_use = bpy.props.BoolProperty(
     name = 'Use Shadow',
     description = 'Save Shadow pass from specified RenderLayers to individual folder.',
@@ -44,20 +42,21 @@ class generate_render_nodes(bpy.types.Operator):
     description = 'Suffix or appendix in the name of RenderLayer for rendering Shadow.',
     default = 'shadow'
   )
-
   remove_existing_nodes = bpy.props.BoolProperty(
     name = 'Remove Existing Nodes',
     description = 'Choose whether the function should remove existing nodes, or only add new.',
     default = True
   )
-    
+  generate_postprocessing = bpy.props.BoolProperty(
+    name = 'Generate Postprocessing',
+    description = 'Automatically create a new POSTPROCESS scene which automatically imports the render outputs.',
+    default = False
+  )  
 
   def execute(self, context):
     # ------------------------------------------------------------------------
     # VARIABLES
     # ------------------------------------------------------------------------
-
-    screen_name = 'Default'
 
     render_layers_from_scene = bpy.context.scene.name   
     render_nodes_to_scene = bpy.context.scene.name
@@ -74,7 +73,7 @@ class generate_render_nodes(bpy.types.Operator):
 
     # read Render Layers
     # switch scene to source
-    bpy.data.screens[screen_name].scene = bpy.data.scenes[render_layers_from_scene]
+    bpy.data.context.scene = bpy.data.scenes[render_layers_from_scene]
     # go through render layers and add them to a list
     render_layer_list = []
     print('Reading render layers:')
@@ -145,8 +144,29 @@ class generate_render_nodes(bpy.types.Operator):
 
 
 
+
+
+
+
+    # check if HEIGHT material exists, if not, create it
+    if bpy.data.materials.get('HEIGHT') is None:
+      # create new HEIGHT material
+      print('HEIGHT material does not exist, creating...')
+      height_mtl = bpy.data.materials.new('HEIGHT')
+      height_mtl.use_nodes = True
+      height_nodes = height_mtl.node_tree.nodes
+      # remove all nodes first
+      for node in height_nodes:
+        height_nodes.remove(node)
+      
+      # create new nodes
+      geometry_node = height_nodes.new(type = 'ShaderNodeNewGeometry')
+      
+
+
+
     # switch scene to destination and make sure nodes are allowed
-    bpy.data.screens[screen_name].scene = bpy.data.scenes[render_nodes_to_scene]
+    bpy.data.context.scene = bpy.data.scenes[render_nodes_to_scene]
     bpy.context.scene.use_nodes = True
 
     # clear all current composite nodes (mainly for debug)
@@ -278,6 +298,17 @@ class generate_render_nodes(bpy.types.Operator):
       bpy.context.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
 
       print(render_layer_name)
+
+    # ----------------------------------------------------------------------------------------------------- #
+    #                                                                                                       #
+    #                           G E N E R A T E   P O S T P R O C E S S   N O D E S                         #
+    #                                                                                                       #
+    # ----------------------------------------------------------------------------------------------------- #
+    if self.generate_postprocessing == True:
+      
+
+
+
     return {'FINISHED'}
 
 
