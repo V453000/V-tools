@@ -3,7 +3,7 @@ bl_info = {
     'author': 'V453000',
     'description': 'Various tools.',
     'category': 'User',
-    'version': (0, 1, 9),
+    'version': (0, 2, 0),
     'blender': (2, 7, 9)
 }
 
@@ -42,6 +42,8 @@ if "bpy" in locals():
     importlib.reload(Vtools_layered_transfer_copy)
     importlib.reload(Vtools_layered_transfer_paste)
     importlib.reload(Vtools_link_material_to)
+    importlib.reload(Vtools_XYZ_convert_scene)
+    importlib.reload(Vtools_XYZ_render)
 
   from . import Vtools_object_draw_type
   from . import Vtools_default_render_settings
@@ -58,6 +60,8 @@ if "bpy" in locals():
   from . import Vtools_layered_transfer_copy
   from . import Vtools_layered_transfer_paste
   from . import Vtools_link_material_to
+  from . import Vtools_XYZ_convert_scene
+  from . import Vtools_XYZ_render
 
 object_draw_mode =        Vtools_object_draw_type.object_draw_mode
 default_render_settings = Vtools_default_render_settings.default_render_settings
@@ -74,6 +78,8 @@ save_backup =             Vtools_save_backup.save_backup
 layered_transfer_copy =   Vtools_layered_transfer_copy.layered_transfer_copy
 layered_transfer_paste =  Vtools_layered_transfer_paste.layered_transfer_paste
 link_material_to =        Vtools_link_material_to.link_material_to
+XYZ_convert_scene =       Vtools_XYZ_convert_scene.XYZ_convert_scene
+XYZ_render =       Vtools_XYZ_render.XYZ_render
 
 
 
@@ -92,8 +98,6 @@ class tool_panel_blend(bpy.types.Panel):
     layout = self.layout
     layout.operator('blend.save_backup'             , text = 'Save Backup'            , icon = 'SAVE_COPY'          )
     layout.operator('scene.unpack_images'           , text = 'Unpack Images'          , icon = 'IMAGE_COL'          )
-    
-
 
 class tool_panel_scene(bpy.types.Panel):
   bl_space_type = 'VIEW_3D'
@@ -128,6 +132,18 @@ class tool_panel_object(bpy.types.Panel):
     row = layout.row()
     row.operator('object.layered_transfer_copy'     , text = 'Layered Transfer COPY'   , icon = 'COPYDOWN'           )
     row.operator('object.layered_transfer_paste'    , text = 'Layered Transfer PASTE'  , icon = 'PASTEDOWN'          )
+
+class tool_panel_XYZ(bpy.types.Panel):
+  bl_space_type = 'VIEW_3D'
+  bl_region_type = 'TOOLS'
+  bl_category = 'V-tools'
+  bl_label = 'V-tools - XYZ'
+  bl_idname = 'tool_panel_XYZ'
+  def draw(self,context):
+    layout = self.layout
+    layout.operator('scene.xyz_convert_scene'       , text = 'XYZ Convert Scene'       , icon = 'RADIO'              )
+    layout.operator('scene.xyz_render'              , text = 'XYZ Render Animation'    , icon = 'CLIP'               )
+  
 
 class tool_panel_updater(bpy.types.Panel):
   bl_space_type = 'VIEW_3D'
@@ -309,11 +325,14 @@ def register():
   bpy.utils.register_class(layered_transfer_copy)
   bpy.utils.register_class(layered_transfer_paste)
   bpy.utils.register_class(link_material_to)
+  bpy.utils.register_class(XYZ_convert_scene)
+  bpy.utils.register_class(XYZ_render)
   
   # Buttons
   bpy.utils.register_class(tool_panel_blend)
   bpy.utils.register_class(tool_panel_scene)
   bpy.utils.register_class(tool_panel_object)
+  bpy.utils.register_class(tool_panel_XYZ)
   bpy.utils.register_class(tool_panel_updater)
   bpy.utils.register_class(render_panel)
   bpy.utils.register_class(render_layer_panel)
@@ -341,11 +360,14 @@ def unregister():
   bpy.utils.unregister_class(layered_transfer_copy)
   bpy.utils.unregister_class(layered_transfer_paste)
   bpy.utils.unregister_class(link_material_to)
+  bpy.utils.unregister_class(XYZ_convert_scene)
+  bpy.utils.unregister_class(XYZ_render)
   
   # Buttons
   bpy.utils.unregister_class(tool_panel_blend)
   bpy.utils.unregister_class(tool_panel_scene)
   bpy.utils.unregister_class(tool_panel_object)
+  bpy.utils.unregister_class(tool_panel_XYZ)
   bpy.utils.unregister_class(tool_panel_updater)
   bpy.utils.unregister_class(render_panel)
   bpy.utils.unregister_class(render_layer_panel)
