@@ -20,25 +20,39 @@ class XYZ_render(bpy.types.Operator):
       raise RuntimeError("Wasn't able to find", region_type," in area ", area_type,
                           "\n Make sure it's open while executing script.")
 
+    camera_angles = [
+      (           0, 0, 0              ),
+      (           0, 0, math.pi* 8  /6 ),
+      (           0, 0, math.pi* 16 /6 ),
+
+      ( -math.pi /6 ,0, math.pi* 4  /6 ),
+      ( -math.pi /6 ,0, math.pi* 12 /6 ),
+      ( -math.pi /6 ,0, math.pi* 20 /6 ),
+      
+      ( -math.pi /4 ,0, 0              ),
+    ]
     # set render settings
     bpy.ops.scene.xyz_convert_scene()
+
+    # increase the resolution
+    #bpy.context.scene.render.resolution_x = bpy.context.scene.render.resolution_x * 2
+    #bpy.context.scene.render.resolution_y = bpy.context.scene.render.resolution_y * 2
 
     # put cursor to zero
     bpy.context.scene.cursor_location = (0,0,0)
     
-    # get camera
+    # get camera highest parent
     camera_obj = bpy.context.scene.camera
-    
-    # deselect everything
-    bpy.ops.object.select_all(action='DESELECT')
-    camera_obj.select = True
-    bpy.context.scene.objects.active = camera_obj
+
+    camera_boss_object = camera_obj
+    while(camera_boss_object.parent is not None):
+      camera_boss_object = camera_boss_object.parent
 
     # save scene name before starting to change it
     original_scene_name = bpy.context.scene.name
     # iterate through XYZ views
-    for i in range(0, 13):
-      print(i)
+    for i in range(0, 7):
+      print(i, camera_angles[i])
       i_2d = format(i,'02d')
       # change scene name with i
       new_scene_name = original_scene_name + '_XYZ-' + str(i_2d)
@@ -46,17 +60,7 @@ class XYZ_render(bpy.types.Operator):
       # generate new render nodes
       bpy.ops.nodes.generate_render_nodes()
       # rotate camera
-      rot_x = 0
-      rot_y = 0
-      rot_z = i*math.pi/4
-      if i >= 8:
-        rot_x = math.pi/16*3
-        rot_z = i*math.pi/2
-      if i == 12:
-        rot_x = -math.pi/4
-        rot_z = 0
-
-      bpy.data.objects['Camera-Parent'].rotation_euler = (rot_x,rot_y,rot_z)
+      camera_boss_object.rotation_euler = camera_angles[i]
 
       # change cache path
       bpy.context.scene.render.filepath = '//cache\\' + 'cache_' + new_scene_name + '\\' + 'cache_' + new_scene_name + '_'
@@ -66,5 +70,5 @@ class XYZ_render(bpy.types.Operator):
 
     # revert the original scene back as if nothing happened
     bpy.context.scene.name = original_scene_name
-    bpy.data.objects['Camera-Parent'].rotation_euler = (0,0,0)
+    camera_boss_object.rotation_euler = (0,0,0)
     return {'FINISHED'}
