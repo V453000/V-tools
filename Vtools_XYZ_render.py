@@ -20,6 +20,9 @@ class XYZ_render(bpy.types.Operator):
       raise RuntimeError("Wasn't able to find", region_type," in area ", area_type,
                           "\n Make sure it's open while executing script.")
 
+    # set render settings
+    bpy.ops.scene.xyz_convert_scene()
+
     # put cursor to zero
     bpy.context.scene.cursor_location = (0,0,0)
     
