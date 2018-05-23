@@ -38,7 +38,8 @@ class XYZ_render(bpy.types.Operator):
       print(i)
       i_2d = format(i,'02d')
       # change scene name with i
-      bpy.context.scene.name = original_scene_name + '_XYZ-' + str(i_2d)
+      new_scene_name = original_scene_name + '_XYZ-' + str(i_2d)
+      bpy.context.scene.name = new_scene_name
       # generate new render nodes
       bpy.ops.nodes.generate_render_nodes()
       # rotate camera
@@ -53,6 +54,9 @@ class XYZ_render(bpy.types.Operator):
         rot_z = 0
 
       bpy.data.objects['Camera-Parent'].rotation_euler = (rot_x,rot_y,rot_z)
+
+      # change cache path
+      bpy.context.scene.render.filepath = '//cache\\' + 'cache_' + new_scene_name + '\\' + 'cache_' + new_scene_name + '_'
       # render      
       bpy.ops.render.render(animation=True)
       print('View', i_2d, 'finished...')  
