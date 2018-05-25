@@ -6,6 +6,12 @@ class WTF_scene_settings_NRM(bpy.types.Operator):
   bl_label = 'NRM Settings'
   bl_options = {'REGISTER', 'UNDO'}
 
+  replace_materials = bpy.props.BoolProperty(
+    name = 'Replace materials',
+    description = 'Replace all materials on all objects with XYZmap.',
+    default = False
+  )
+
   def execute(self, context):
     
     # apply shared settings
@@ -18,5 +24,12 @@ class WTF_scene_settings_NRM(bpy.types.Operator):
     for scene in bpy.data.scenes:
       for renderlayer in scene.render.layers:
         renderlayer.material_override = bpy.data.materials['Normalmap']
+
+    # replace materials of all objects
+    if self.replace_materials == True:
+      bpy.context.scene.Mtl_for_mat_replace = 'Normalmap'
+      for obj in bpy.data.objects:
+        bpy.context.scene.Obj_for_mat_replace = obj.name
+        bpy.ops.object.material_replace()
 
     return {'FINISHED'}

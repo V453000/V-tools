@@ -2,7 +2,7 @@ import bpy
 from bpy.app.handlers import persistent
 
 class material_replace(bpy.types.Operator):
-  '''Replaces all materials on all objects with selected material.'''
+  '''Replaces all materials on picked object. If no object is picked, then all Selected objects will be used.'''
   bl_idname = 'object.material_replace'
   bl_label = 'Material replace'
   bl_options = {'REGISTER', 'UNDO'}
@@ -10,21 +10,33 @@ class material_replace(bpy.types.Operator):
   def execute(self, context):
     
     def replace_materials(obj_name, material_name):
-      obj = bpy.data.objects[obj_name]
-      # assign material to objects if it's a mesh
-      DestinationMaterial = bpy.data.materials.get(material_name)
-      if obj.type == 'MESH':
-        if obj.data.materials:
-          slotCount = len(obj.material_slots)
-          slotNumber = 0
+      list_of_object_names = []
 
-          for slotNumber in range(0, slotCount):
-            obj.material_slots[slotNumber].material = DestinationMaterial
-          
-        else:
-          obj.data.materials.append(DestinationMaterial)
+      if obj_name == '':
+        for obj in bpy.context.selected_objects:
+          list_of_object_names.append(obj.name)
+      else:
+        list_of_object_names = [obj_name]
+      
+      if list_of_object_names == [] or material_name == '':
+        print('No objects or material specified, aborting material replace...')
+      else:
+        for object_name in list_of_object_names:
+          obj = bpy.data.objects[object_name]
+          # assign material to objects if it's a mesh
+          DestinationMaterial = bpy.data.materials.get(material_name)
+          if obj.type == 'MESH':
+            if obj.data.materials:
+              slotCount = len(obj.material_slots)
+              slotNumber = 0
 
-    #replace_materials(self.set_object, self.set_material)
+              for slotNumber in range(0, slotCount):
+                obj.material_slots[slotNumber].material = DestinationMaterial
+              
+            else:
+              obj.data.materials.append(DestinationMaterial)
+
+    replace_materials(bpy.context.scene.Obj_for_mat_replace, bpy.context.scene.Mtl_for_mat_replace)
 
     return {'FINISHED'}
 
