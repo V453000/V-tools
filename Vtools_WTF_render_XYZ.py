@@ -1,10 +1,10 @@
 import bpy
 import math
 
-class XYZ_render(bpy.types.Operator):
+class WTF_render_XYZ(bpy.types.Operator):
   '''Renders every frame with all the XYZ map rotations, adjusting the scene name and auto-generating output nodes.'''
-  bl_idname = 'scene.xyz_render'
-  bl_label = 'XYZ Render'
+  bl_idname = 'scene.wtf_render_xyz'
+  bl_label = 'Render XYZ'
   bl_options = {'REGISTER', 'UNDO'}
 
   def execute(self, context):
@@ -32,7 +32,7 @@ class XYZ_render(bpy.types.Operator):
       ( -math.pi /4 ,0, 0              ),
     ]
     # set render settings
-    bpy.ops.scene.xyz_convert_scene()
+    #bpy.ops.scene.xyz_convert_scene()
 
     # increase the resolution
     #bpy.context.scene.render.resolution_x = bpy.context.scene.render.resolution_x * 2
