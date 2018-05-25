@@ -15,7 +15,7 @@ class WTF_scene_settings_shared(bpy.types.Operator):
 
       bpy.context.scene.render.image_settings.compression = 0
 
-      bpy.context.scene.cycles.samples = 1
+      bpy.context.scene.cycles.samples = 1000
       bpy.context.scene.cycles.max_bounces = 0
       bpy.context.scene.cycles.min_bounces = 0
       bpy.context.scene.cycles.diffuse_bounces = 0

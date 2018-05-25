@@ -1,4 +1,6 @@
 import bpy
+import math
+pi = math.pi
 
 class WTF_generate_material_XYZ(bpy.types.Operator):
   '''Generates the XYZmap material.'''
@@ -30,17 +32,20 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       xyz_geometry_node = xyz_nodes.new('ShaderNodeNewGeometry')
       xyz_geometry_node.location = (loc_x, loc_y)
       loc_x = loc_x + 200
+
+      cam_z_rot = bpy.context.scene.camera.matrix_world.to_euler()[2] # Z rotation of the current scene's camera
+
       xyz_mapping_node = xyz_nodes.new('ShaderNodeMapping')
       xyz_mapping_node.vector_type = 'TEXTURE'
-      xyz_mapping_node.translation[0] = -15
-      xyz_mapping_node.translation[1] = -15
-      xyz_mapping_node.translation[2] = -2
+      xyz_mapping_node.translation[0] = -32
+      xyz_mapping_node.translation[1] = -32
+      xyz_mapping_node.translation[2] = -32
       xyz_mapping_node.rotation[0] = 0
       xyz_mapping_node.rotation[1] = 0
-      xyz_mapping_node.rotation[2] = 0
-      xyz_mapping_node.scale[0] = 40
-      xyz_mapping_node.scale[1] = 40
-      xyz_mapping_node.scale[2] = 40
+      xyz_mapping_node.rotation[2] = -cam_z_rot+(pi*3/2) # decide rotation based on camera Z rotation
+      xyz_mapping_node.scale[0] = 64
+      xyz_mapping_node.scale[1] = 64
+      xyz_mapping_node.scale[2] = 64
       xyz_mapping_node.location = (loc_x, loc_y)
       loc_x = loc_x + 400
 
