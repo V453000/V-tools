@@ -34,15 +34,36 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       loc_x = loc_x + 200
 
       cam_z_rot = bpy.context.scene.camera.matrix_world.to_euler()[2] # Z rotation of the current scene's camera
+      texture_z_rot = -cam_z_rot+(pi*3/2) #cam_z_rot
+      texture_z_rot_simplified = texture_z_rot *2 /pi
+      texture_z_rot_rounded = round(texture_z_rot_simplified, 0)
+      texture_z_rot_int = (int(texture_z_rot_rounded)-3)*-1
 
       xyz_mapping_node = xyz_nodes.new('ShaderNodeMapping')
       xyz_mapping_node.vector_type = 'TEXTURE'
-      xyz_mapping_node.translation[0] = -32
-      xyz_mapping_node.translation[1] = -32
-      xyz_mapping_node.translation[2] = -32
+
+      
       xyz_mapping_node.rotation[0] = 0
       xyz_mapping_node.rotation[1] = 0
-      xyz_mapping_node.rotation[2] = -cam_z_rot+(pi*3/2) # decide rotation based on camera Z rotation
+      #xyz_mapping_node.rotation[2] = -cam_z_rot+(pi*3/2)
+
+      if texture_z_rot_int == 0:
+        xyz_mapping_node.translation = (-32, -32, -32)
+        xyz_mapping_node.rotation[2] = 0
+        print('0')
+      if texture_z_rot_int == 1:
+        xyz_mapping_node.translation = ( 32, -32, -32)
+        xyz_mapping_node.rotation[2] = pi/2
+        print('1')
+      if texture_z_rot_int == 2 or texture_z_rot_int == -2:
+        xyz_mapping_node.translation = ( 32,  32, -32)
+        xyz_mapping_node.rotation[2] = pi
+        print('2 / -2')
+      if texture_z_rot_int == -1:
+        xyz_mapping_node.translation = (-32,  32, -32)
+        xyz_mapping_node.rotation[2] = -pi/2
+        print('-1')
+
       xyz_mapping_node.scale[0] = 64
       xyz_mapping_node.scale[1] = 64
       xyz_mapping_node.scale[2] = 64
