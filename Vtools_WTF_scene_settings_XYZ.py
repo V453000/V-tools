@@ -22,6 +22,12 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
     # apply shared settings
     bpy.ops.scene.wtf_scene_settings_shared()
     
+    # output & cache & placeholder settings
+    for scene in bpy.data.scenes:
+      scene.render.filepath = '//cache\\\\' + scene.name + '/' + scene.name + '-cache_'
+      scene.render.use_overwrite = False
+      scene.render.use_placeholder = True
+
     # generate material
     bpy.ops.scene.wtf_generate_material_xyz(XYZ_wtfscale = self.XYZ_wtfscale)
 
