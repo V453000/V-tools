@@ -3,7 +3,7 @@ bl_info = {
     'author': 'V453000',
     'description': 'Various tools.',
     'category': 'User',
-    'version': (0, 2, 1),
+    'version': (0, 2, 3),
     'blender': (2, 7, 9)
 }
 
