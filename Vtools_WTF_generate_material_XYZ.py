@@ -8,9 +8,14 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
   bl_label = 'Generate XYZmap'
   bl_options = {'REGISTER', 'UNDO'}
 
+  XYZ_wtfscale = bpy.props.FloatProperty(
+  name = 'Scale',
+  default = 32
+  )
+
   def execute(self, context):
-    
-    def generate_xyz_material():
+  
+    def generate_xyz_material(XYZ_scale):
       if bpy.data.materials.get('XYZmap') is None:
         # create XYZmap material
         xyz_material = bpy.data.materials.new('XYZmap')
@@ -47,26 +52,28 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       xyz_mapping_node.rotation[1] = 0
       #xyz_mapping_node.rotation[2] = -cam_z_rot+(pi*3/2)
 
+      #XYZ_scale = self.XYZ_scale
+
       if texture_z_rot_int == 0:
-        xyz_mapping_node.translation = (-32, -32, -32)
+        xyz_mapping_node.translation = (-XYZ_scale, -XYZ_scale, -XYZ_scale)
         xyz_mapping_node.rotation[2] = 0
         print('0')
       if texture_z_rot_int == 1:
-        xyz_mapping_node.translation = ( 32, -32, -32)
+        xyz_mapping_node.translation = ( XYZ_scale, -XYZ_scale, -XYZ_scale)
         xyz_mapping_node.rotation[2] = pi/2
         print('1')
       if texture_z_rot_int == 2 or texture_z_rot_int == -2:
-        xyz_mapping_node.translation = ( 32,  32, -32)
+        xyz_mapping_node.translation = ( XYZ_scale,  XYZ_scale, -XYZ_scale)
         xyz_mapping_node.rotation[2] = pi
         print('2 / -2')
       if texture_z_rot_int == -1:
-        xyz_mapping_node.translation = (-32,  32, -32)
+        xyz_mapping_node.translation = (-XYZ_scale,  XYZ_scale, -XYZ_scale)
         xyz_mapping_node.rotation[2] = -pi/2
         print('-1')
 
-      xyz_mapping_node.scale[0] = 64
-      xyz_mapping_node.scale[1] = 64
-      xyz_mapping_node.scale[2] = 64
+      xyz_mapping_node.scale[0] = XYZ_scale*2
+      xyz_mapping_node.scale[1] = XYZ_scale*2
+      xyz_mapping_node.scale[2] = XYZ_scale*2
       xyz_mapping_node.location = (loc_x, loc_y)
       loc_x = loc_x + 400
 
@@ -88,6 +95,6 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
     # ------------------------------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------------------------------
 
-    generate_xyz_material()
+    generate_xyz_material(self.XYZ_wtfscale)
 
     return {'FINISHED'}

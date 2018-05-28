@@ -11,6 +11,11 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
     description = 'Replace all materials on all objects with XYZmap.',
     default = False
   )
+  
+  XYZ_wtfscale = bpy.props.FloatProperty(
+  name = 'Scale',
+  default = 32
+  )
 
   def execute(self, context):
     
@@ -18,7 +23,7 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
     bpy.ops.scene.wtf_scene_settings_shared()
     
     # generate material
-    bpy.ops.scene.wtf_generate_material_xyz()
+    bpy.ops.scene.wtf_generate_material_xyz(XYZ_wtfscale = self.XYZ_wtfscale)
 
     # set material override on all RenderLayers
     for scene in bpy.data.scenes:
