@@ -24,12 +24,18 @@ class WTF_scene_settings_NRM(bpy.types.Operator):
     for scene in bpy.data.scenes:
       for renderlayer in scene.render.layers:
         renderlayer.material_override = bpy.data.materials['Normalmap']
-
+  
+    # store original values of the object and mtl picker boxes
+    store_mtl = bpy.context.scene.Mtl_for_mat_replace
+    store_obj = bpy.context.scene.Obj_for_mat_replace
     # replace materials of all objects
     if self.replace_materials == True:
       bpy.context.scene.Mtl_for_mat_replace = 'Normalmap'
       for obj in bpy.data.objects:
         bpy.context.scene.Obj_for_mat_replace = obj.name
         bpy.ops.object.material_replace()
+    # revert the obj and mtl picked boxes to their original state
+    bpy.context.scene.Mtl_for_mat_replace = store_mtl
+    bpy.context.scene.Obj_for_mat_replace = store_obj
 
     return {'FINISHED'}
