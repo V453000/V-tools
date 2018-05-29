@@ -52,9 +52,14 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       camera_rotation   = bpy.context.scene.camera.matrix_world.to_euler()
       zero_camera_vector = mathutils.Vector((0,0,1))
       camera_vector = camera_position_3x3 * zero_camera_vector
+      camera_vector_1z = mathutils.Vector((camera_vector[0]/camera_vector[2],camera_vector[1]/camera_vector[2],camera_vector[2]/camera_vector[2]))
       camera_ground_target = camera_position - ( camera_vector * (camera_position[2] / camera_vector[2]))
       cam_offset = camera_ground_target
-      print('Camera target is at', camera_ground_target)
+      height_offset = bpy.context.scene.objects['HEIGHT'].location[2]
+      print('Camera vector is:   ', camera_vector)
+      print('Camera vector_1z is:', camera_vector_1z)
+      print('Camera target is:   ', camera_ground_target)
+      print('Height offset is:   ', height_offset)
 
       xyz_mapping_node = xyz_nodes.new('ShaderNodeMapping')
       xyz_mapping_node.vector_type = 'TEXTURE'
@@ -69,33 +74,36 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       if texture_z_rot_int == 0:
         offset_vector = (-1,-1,-1)
         o = offset_vector
-        xyz_mapping_node.translation = (XYZ_scale*o[0] - cam_offset[0]*o[0],
-                                        XYZ_scale*o[1] - cam_offset[1]*o[1],
-                                        XYZ_scale*o[2] - cam_offset[2]*o[2])
+        xyz_mapping_node.translation = (XYZ_scale*o[0] - cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset,
+                                        XYZ_scale*o[1] - cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset,
+                                        XYZ_scale*o[2] - cam_offset[2]*o[2] + height_offset)
         xyz_mapping_node.rotation[2] = 0
         print('0')
+
       if texture_z_rot_int == 1:
         offset_vector = ( 1,-1,-1)
         o = offset_vector
-        xyz_mapping_node.translation = (XYZ_scale*o[0] + cam_offset[0]*o[0],
-                                        XYZ_scale*o[1] - cam_offset[1]*o[1],
-                                        XYZ_scale*o[2] - cam_offset[2]*o[2])
+        xyz_mapping_node.translation = (XYZ_scale*o[0] + cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset,
+                                        XYZ_scale*o[1] - cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset,
+                                        XYZ_scale*o[2] - cam_offset[2]*o[2] + height_offset)
         xyz_mapping_node.rotation[2] = pi/2
         print('1')
+
       if texture_z_rot_int == 2 or texture_z_rot_int == -2:
         offset_vector = ( 1, 1,-1)
         o = offset_vector
-        xyz_mapping_node.translation = (XYZ_scale*o[0] + cam_offset[0]*o[0],
-                                        XYZ_scale*o[1] + cam_offset[1]*o[1],
-                                        XYZ_scale*o[2] - cam_offset[2]*o[2])
+        xyz_mapping_node.translation = (XYZ_scale*o[0] + cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset,
+                                        XYZ_scale*o[1] + cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset,
+                                        XYZ_scale*o[2] - cam_offset[2]*o[2] + height_offset)
         xyz_mapping_node.rotation[2] = pi
         print('2 / -2')
+
       if texture_z_rot_int == -1:
         offset_vector = (-1, 1,-1)
         o = offset_vector
-        xyz_mapping_node.translation = (XYZ_scale*o[0] - cam_offset[0]*o[0],
-                                        XYZ_scale*o[1] + cam_offset[1]*o[1],
-                                        XYZ_scale*o[2] - cam_offset[2]*o[2])
+        xyz_mapping_node.translation = (XYZ_scale*o[0] - cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset,
+                                        XYZ_scale*o[1] + cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset,
+                                        XYZ_scale*o[2] - cam_offset[2]*o[2] + height_offset)
         xyz_mapping_node.rotation[2] = -pi/2
         print('-1')
 
