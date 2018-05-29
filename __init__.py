@@ -3,7 +3,7 @@ bl_info = {
     'author': 'V453000',
     'description': 'Various tools.',
     'category': 'User',
-    'version': (0, 2, 3),
+    'version': (0, 2, 4),
     'blender': (2, 7, 9)
 }
 
@@ -42,9 +42,9 @@ if "bpy" in locals():
     importlib.reload(Vtools_layered_transfer_copy)
     importlib.reload(Vtools_layered_transfer_paste)
     importlib.reload(Vtools_link_material_to)
-    
+
     importlib.reload(Vtools_material_replace)
-    
+
     importlib.reload(Vtools_WTF_generate_material_XYZ)
     importlib.reload(Vtools_WTF_generate_material_NRM)
     importlib.reload(Vtools_WTF_scene_settings_shared)
@@ -53,7 +53,7 @@ if "bpy" in locals():
     importlib.reload(Vtools_WTF_render_XYZ)
 
     importlib.reload(Vtools_XYZ_convert_scene)
-    
+
 
   from . import Vtools_object_draw_type
   from . import Vtools_default_render_settings
@@ -72,7 +72,7 @@ if "bpy" in locals():
   from . import Vtools_link_material_to
 
   from . import Vtools_material_replace
-  
+
   from . import Vtools_WTF_generate_material_XYZ
   from . import Vtools_WTF_generate_material_NRM
   from . import Vtools_WTF_scene_settings_shared
@@ -81,7 +81,7 @@ if "bpy" in locals():
   from . import Vtools_WTF_render_XYZ
 
   from . import Vtools_XYZ_convert_scene
-  
+
 
 object_draw_mode =        Vtools_object_draw_type.object_draw_mode
 default_render_settings = Vtools_default_render_settings.default_render_settings
@@ -173,7 +173,7 @@ class tool_panel_object(bpy.types.Panel):
 #  def draw(self,context):
 #    layout = self.layout
 #    layout.prop_search()
-  
+
 
 class tool_panel_XYZ(bpy.types.Panel):
   bl_space_type = 'VIEW_3D'
@@ -250,7 +250,7 @@ class render_layer_panel(bpy.types.Panel):
 
   def draw(self,context):
     layout = self.layout
-    layout.operator('nodes.generate_render_nodes'   , text = 'Generate Render Nodes'  , icon = 'NODETREE'           )  
+    layout.operator('nodes.generate_render_nodes'   , text = 'Generate Render Nodes'  , icon = 'NODETREE'           )
 
 class material_panel(bpy.types.Panel):
   bl_space_type = 'PROPERTIES'
@@ -435,8 +435,8 @@ def unregister():
   bpy.utils.unregister_class(XYZ_convert_scene)
 
   Vtools_material_replace.unregister()
-  
-  
+
+
   # Buttons
   bpy.utils.unregister_class(tool_panel_blend)
   bpy.utils.unregister_class(tool_panel_scene)
