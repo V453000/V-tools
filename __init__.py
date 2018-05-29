@@ -164,16 +164,6 @@ class tool_panel_object(bpy.types.Panel):
     row.operator('object.layered_transfer_copy'     , text = 'Layered Transfer COPY'   , icon = 'COPYDOWN'           )
     row.operator('object.layered_transfer_paste'    , text = 'Layered Transfer PASTE'  , icon = 'PASTEDOWN'          )
 
-#class tool_panel_material_replace(bpy.types.Panel):
-#  bl_space_type = 'VIEW_3D'
-#  bl_region_type = 'TOOLS'
-#  bl_category = 'V-tools'
-#  bl_label = 'V-tools - Material Replace'
-#  bl_idname = 'material_replace'
-#  def draw(self,context):
-#    layout = self.layout
-#    layout.prop_search()
-
 
 class tool_panel_XYZ(bpy.types.Panel):
   bl_space_type = 'VIEW_3D'
@@ -390,9 +380,11 @@ def register():
   bpy.utils.register_class(tool_panel_blend)
   bpy.utils.register_class(tool_panel_scene)
   bpy.utils.register_class(tool_panel_object)
-  bpy.utils.register_class(tool_panel_XYZ)
 
   Vtools_material_replace.register()
+  bpy.utils.register_class(tool_panel_XYZ)
+
+
   #bpy.utils.register_class(material_replace)
   #bpy.utils.register_class(material_replace_panel)
 
