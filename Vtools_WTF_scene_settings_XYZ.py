@@ -11,17 +11,25 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
     description = 'Replace all materials on all objects with XYZmap.',
     default = False
   )
-  
+
   XYZ_wtfscale = bpy.props.FloatProperty(
   name = 'Scale',
   default = 32
   )
+  XYZ_groundheight = bpy.props.FloatProperty(
+  name = 'Ground Height',
+  default = 0
+  )
+  XYZ_groundheight_from_selected = bpy.props.BoolProperty(
+  name = 'Active object sets Ground Height',
+  default = False
+  )
 
   def execute(self, context):
-    
+
     # apply shared settings
     bpy.ops.scene.wtf_scene_settings_shared()
-    
+
     # output & cache & placeholder settings
     for scene in bpy.data.scenes:
       scene.render.filepath = '//cache\\\\' + scene.name + '/' + scene.name + '-cache_'
@@ -29,7 +37,7 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
       scene.render.use_placeholder = True
 
     # generate material
-    bpy.ops.scene.wtf_generate_material_xyz(XYZ_wtfscale = self.XYZ_wtfscale)
+    bpy.ops.scene.wtf_generate_material_xyz(XYZ_wtfscale = self.XYZ_wtfscale, XYZ_groundheight = self.XYZ_groundheight, XYZ_groundheight_from_selected = self.XYZ_groundheight_from_selected)
 
     # set material override on all RenderLayers
     for scene in bpy.data.scenes:

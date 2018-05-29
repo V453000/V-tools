@@ -14,6 +14,14 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
   name = 'Scale',
   default = 32
   )
+  XYZ_groundheight = bpy.props.FloatProperty(
+  name = 'Ground Height',
+  default = 0
+  )
+  XYZ_groundheight_from_selected = bpy.props.BoolProperty(
+  name = 'Active object sets Ground Height',
+  default = False
+  )
 
   def execute(self, context):
 
@@ -55,7 +63,11 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       camera_vector_1z = mathutils.Vector((camera_vector[0]/camera_vector[2],camera_vector[1]/camera_vector[2],camera_vector[2]/camera_vector[2]))
       camera_ground_target = camera_position - ( camera_vector * (camera_position[2] / camera_vector[2]))
       cam_offset = camera_ground_target
-      height_offset = bpy.context.scene.objects['HEIGHT'].location[2]
+      #height_offset = bpy.context.scene.objects['HEIGHT'].location[2]
+      if self.XYZ_groundheight_from_selected == True:
+        height_offset = bpy.context.scene.objects.active.location[2]
+      else:
+        height_offset = self.XYZ_groundheight
       print('Camera vector is:   ', camera_vector)
       print('Camera vector_1z is:', camera_vector_1z)
       print('Camera target is:   ', camera_ground_target)
