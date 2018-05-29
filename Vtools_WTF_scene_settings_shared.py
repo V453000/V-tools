@@ -7,7 +7,7 @@ class WTF_scene_settings_shared(bpy.types.Operator):
   bl_options = {'REGISTER', 'UNDO'}
 
   def execute(self, context):
-    
+
     def xyz_render_settings():
       bpy.context.scene.render.engine = 'CYCLES'
       #bpy.context.scene.render.engine = 'BLENDER_RENDER'
@@ -30,7 +30,7 @@ class WTF_scene_settings_shared(bpy.types.Operator):
       bpy.context.scene.cycles.pixel_filter_type = 'GAUSSIAN'
       bpy.context.scene.cycles.filter_width = 1.5
 
-    
+
     def remove_lights():
       #remove all lamps
       for obj in bpy.data.objects:
@@ -61,10 +61,10 @@ class WTF_scene_settings_shared(bpy.types.Operator):
             if renderlayer.material_override is not None:
               remove_layer = True
           # remove the layer if it should be removed
-          if remove_layer == True:  
-            bpy.context.scene.render.layers.remove(renderlayer)
+          if remove_layer == True:
+            scene.render.layers.remove(renderlayer)
 
-    
+
     # ------------------------------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------------------------------
     #                        E X E C U T E   T O O L

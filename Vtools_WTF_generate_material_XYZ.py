@@ -25,7 +25,7 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
 
   def execute(self, context):
 
-    def generate_xyz_material(XYZ_scale):
+    def generate_xyz_material(XYZ_scale, XYZ_groundheight, XYZ_groundheight_from_selected):
       if bpy.data.materials.get('XYZmap') is None:
         # create XYZmap material
         xyz_material = bpy.data.materials.new('XYZmap')
@@ -49,7 +49,9 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       loc_x = loc_x + 200
 
       # figure out the rotation of the camera to get the rotation and position of the XYZ map
-      cam_z_rot = bpy.context.scene.camera.matrix_world.to_euler()[2] # Z rotation of the current scene's camera
+      cam_z_rot = 0
+      if bpy.context.scene.camera is not None:
+        cam_z_rot = bpy.context.scene.camera.matrix_world.to_euler()[2] # Z rotation of the current scene's camera
       texture_z_rot = -cam_z_rot+(pi*3/2) #cam_z_rot
       texture_z_rot_simplified = texture_z_rot *2 /pi
       texture_z_rot_rounded = round(texture_z_rot_simplified, 0)
@@ -64,10 +66,10 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       camera_ground_target = camera_position - ( camera_vector * (camera_position[2] / camera_vector[2]))
       cam_offset = camera_ground_target
       #height_offset = bpy.context.scene.objects['HEIGHT'].location[2]
-      if self.XYZ_groundheight_from_selected == True:
+      if XYZ_groundheight_from_selected == True:
         height_offset = bpy.context.scene.objects.active.location[2]
       else:
-        height_offset = self.XYZ_groundheight
+        height_offset = XYZ_groundheight
       print('Camera vector is:   ', camera_vector)
       print('Camera vector_1z is:', camera_vector_1z)
       print('Camera target is:   ', camera_ground_target)
@@ -143,6 +145,6 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
     # ------------------------------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------------------------------
 
-    generate_xyz_material(self.XYZ_wtfscale)
+    generate_xyz_material(self.XYZ_wtfscale, self.XYZ_groundheight, self.XYZ_groundheight_from_selected)
 
     return {'FINISHED'}
