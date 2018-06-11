@@ -42,6 +42,7 @@ if "bpy" in locals():
     importlib.reload(Vtools_layered_transfer_copy)
     importlib.reload(Vtools_layered_transfer_paste)
     importlib.reload(Vtools_link_material_to)
+    importlib.reload(Vtools_duplicate_render_layer)
 
     importlib.reload(Vtools_material_replace)
 
@@ -70,6 +71,7 @@ if "bpy" in locals():
   from . import Vtools_layered_transfer_copy
   from . import Vtools_layered_transfer_paste
   from . import Vtools_link_material_to
+  from . import Vtools_duplicate_render_layer
 
   from . import Vtools_material_replace
 
@@ -98,9 +100,10 @@ save_backup =             Vtools_save_backup.save_backup
 layered_transfer_copy =   Vtools_layered_transfer_copy.layered_transfer_copy
 layered_transfer_paste =  Vtools_layered_transfer_paste.layered_transfer_paste
 link_material_to =        Vtools_link_material_to.link_material_to
+duplicate_render_layer =  Vtools_duplicate_render_layer.duplicate_render_layer
 
 material_replace =        Vtools_material_replace.material_replace
-material_replace_panel =        Vtools_material_replace.material_replace_panel
+material_replace_panel =  Vtools_material_replace.material_replace_panel
 
 WTF_generate_material_XYZ    =   Vtools_WTF_generate_material_XYZ.WTF_generate_material_XYZ
 WTF_generate_material_NRM    =   Vtools_WTF_generate_material_NRM.WTF_generate_material_NRM
@@ -141,6 +144,7 @@ class tool_panel_scene(bpy.types.Panel):
     layout = self.layout
     layout.operator('render.default_render_settings', text = 'Default Render Settings', icon = 'RESTRICT_RENDER_OFF')
     layout.operator('nodes.generate_render_nodes'   , text = 'Generate Render Nodes'  , icon = 'NODETREE'           )
+    layout.operator('scene.duplicate_render_layer'  , text = 'Duplicate RenderLayer'  , icon = 'RENDERLAYERS'       )
 
 class tool_panel_object(bpy.types.Panel):
   bl_space_type = 'VIEW_3D'
@@ -366,6 +370,7 @@ def register():
   bpy.utils.register_class(layered_transfer_copy)
   bpy.utils.register_class(layered_transfer_paste)
   bpy.utils.register_class(link_material_to)
+  bpy.utils.register_class(duplicate_render_layer)
 
   bpy.utils.register_class(WTF_generate_material_XYZ   )
   bpy.utils.register_class(WTF_generate_material_NRM   )
@@ -416,6 +421,7 @@ def unregister():
   bpy.utils.unregister_class(layered_transfer_copy)
   bpy.utils.unregister_class(layered_transfer_paste)
   bpy.utils.unregister_class(link_material_to)
+  bpy.utils.unregister_class(duplicate_render_layer)
 
   bpy.utils.unregister_class(WTF_generate_material_XYZ   )
   bpy.utils.unregister_class(WTF_generate_material_NRM   )
