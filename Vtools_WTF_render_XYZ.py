@@ -48,27 +48,39 @@ class WTF_render_XYZ(bpy.types.Operator):
     while(camera_boss_object.parent is not None):
       camera_boss_object = camera_boss_object.parent
 
+    # save starting frame
+    frame_start = bpy.context.scene.frame_start
+    # save ending frame
+    frame_end = bpy.context.scene.frame_end
+
     # save scene name before starting to change it
     original_scene_name = bpy.context.scene.name
-    # iterate through XYZ views
-    for i in range(0, 7):
-      print(i, camera_angles[i])
-      i_2d = format(i,'02d')
-      # change scene name with i
-      new_scene_name = original_scene_name + '_XYZ-' + str(i_2d)
-      bpy.context.scene.name = new_scene_name
-      # generate new render nodes
-      bpy.ops.nodes.generate_render_nodes()
-      # rotate camera
-      camera_boss_object.rotation_euler = camera_angles[i]
+    # iterate through frames and render each one individually
+    for f in range(frame_start, frame_end):
+      # render just the individual frame
+      frame_start = f
+      frame_end = f
+      # set XYZ settings for every frame (only useful when the camera has actually moved/rotated)
+      bpy.ops.scene.wtf_scene_settings_xyz()
+      # iterate through XYZ views
+      for i in range(0, 7):
+        print(i, camera_angles[i])
+        i_2d = format(i,'02d')
+        # change scene name with i
+        new_scene_name = original_scene_name + '_XYZ-' + str(i_2d)
+        bpy.context.scene.name = new_scene_name
+        # generate new render nodes
+        bpy.ops.nodes.generate_render_nodes()
+        # rotate camera
+        camera_boss_object.rotation_euler = camera_angles[i]
 
-      # change cache path
-      bpy.context.scene.render.filepath = '//cache\\' + 'cache_' + new_scene_name + '\\' + 'cache_' + new_scene_name + '_'
-      # render      
-      bpy.ops.render.render(animation=True)
-      print('View', i_2d, 'finished...')  
+        # change cache path
+        bpy.context.scene.render.filepath = '//cache\\' + 'cache_' + new_scene_name + '\\' + 'cache_' + new_scene_name + '_'
+        # render      
+        bpy.ops.render.render(animation=True)
+        print('View', i_2d, 'finished...')  
 
-    # revert the original scene back as if nothing happened
-    bpy.context.scene.name = original_scene_name
-    camera_boss_object.rotation_euler = (0,0,0)
+      # revert the original scene back as if nothing happened
+      bpy.context.scene.name = original_scene_name
+      camera_boss_object.rotation_euler = (0,0,0)
     return {'FINISHED'}
