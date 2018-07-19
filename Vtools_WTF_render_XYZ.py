@@ -61,7 +61,8 @@ class WTF_render_XYZ(bpy.types.Operator):
       bpy.context.scene.frame_start = f
       bpy.context.scene.frame_end = f
       # set the correct frame so that it regenerates the materials with the correct camera position
-      bpy.context.scene.frame_current = f
+      #bpy.context.scene.frame_current = f
+      bpy.context.scene.frame_set(f)
       # set XYZ settings for every frame (only useful when the camera has actually moved/rotated)
       bpy.ops.scene.wtf_scene_settings_xyz()
       # iterate through XYZ views
