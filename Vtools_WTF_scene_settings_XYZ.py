@@ -42,7 +42,12 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
     # set material override on all RenderLayers
     for scene in bpy.data.scenes:
       for renderlayer in scene.render.layers:
-        renderlayer.material_override = bpy.data.materials['XYZmap']
+        #renderlayer.material_override = bpy.data.materials['XYZmap']
+        '''
+        Disabled because every material is getting the node group.
+        '''
+        renderlayer.material_override = None
+        
 
     # store original values of the object and mtl picker boxes
     store_mtl = bpy.context.scene.Mtl_for_mat_replace

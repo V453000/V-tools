@@ -26,25 +26,41 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
   def execute(self, context):
 
     def generate_xyz_material(XYZ_scale, XYZ_groundheight, XYZ_groundheight_from_selected):
+      # check if XYZmap material exists
       if bpy.data.materials.get('XYZmap') is None:
         # create XYZmap material
         xyz_material = bpy.data.materials.new('XYZmap')
         xyz_material.use_nodes = True
       else:
         xyz_material = bpy.data.materials['XYZmap']
+      
+      # check if XYZmap group exists
+      if bpy.data.node_groups.get('XYZgroup') is None:
+        # create XYZmap group
+        xyz_group = bpy.data.node_groups.new(type = 'ShaderNodeTree', name = 'XYZgroup')
+      else:
+        xyz_group = bpy.data.node_groups['XYZgroup']
 
-      xyz_tree = xyz_material.node_tree
-      xyz_nodes = xyz_tree.nodes
-      xyz_links = xyz_tree.links
-      # clean all nodes
-      for node in xyz_nodes:
-        xyz_nodes.remove(node)
+      
+      xyz_material_nodes = xyz_material.node_tree.nodes
+      xyz_group_nodes = xyz_group.nodes
+      xyz_material_links = xyz_material.node_tree.links
+      xyz_group_links = xyz_group.links
+      
+      # clean all nodes from both the material and the group
+      for node in xyz_group_nodes:
+        xyz_group_nodes.remove(node)
+      for node in xyz_material_nodes:
+        xyz_material_nodes.remove(node)
+
+      xyz_group_in_material = xyz_material_nodes.new('ShaderNodeGroup')
+      xyz_group_in_material.node_tree = xyz_group
 
       # add nodes
       loc_x = 0
       loc_y = 0
 
-      xyz_geometry_node = xyz_nodes.new('ShaderNodeNewGeometry')
+      xyz_geometry_node = xyz_group_nodes.new('ShaderNodeNewGeometry')
       xyz_geometry_node.location = (loc_x, loc_y)
       loc_x = loc_x + 200
 
@@ -75,7 +91,7 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       print('Camera target is:   ', camera_ground_target)
       print('Height offset is:   ', height_offset)
 
-      xyz_mapping_node = xyz_nodes.new('ShaderNodeMapping')
+      xyz_mapping_node = xyz_group_nodes.new('ShaderNodeMapping')
       xyz_mapping_node.vector_type = 'TEXTURE'
 
 
@@ -127,17 +143,40 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       xyz_mapping_node.location = (loc_x, loc_y)
       loc_x = loc_x + 400
 
-      xyz_emission_node = xyz_nodes.new('ShaderNodeEmission')
+      xyz_emission_node = xyz_group_nodes.new('ShaderNodeEmission')
       xyz_emission_node.location = (loc_x, loc_y)
       loc_x = loc_x + 200
 
-      xyz_output_node = xyz_nodes.new('ShaderNodeOutputMaterial')
+      xyz_group_output_node = xyz_group_nodes.new('NodeGroupOutput')
+      xyz_group_output_node.location = (loc_x, loc_y)
+      #xyz_group_output_node.inputs.new(type = 'SHADER', name = 'XYZ') # this doesn't seem to do anything, the linking works without it
+
+      xyz_output_node = xyz_material_nodes.new('ShaderNodeOutputMaterial')
       xyz_output_node.location = (loc_x, loc_y)
 
       # add links
-      xyz_links.new(xyz_geometry_node.outputs['Position'], xyz_mapping_node.inputs[0])
-      xyz_links.new(xyz_mapping_node.outputs[0], xyz_emission_node.inputs[0])
-      xyz_links.new(xyz_emission_node.outputs[0], xyz_output_node.inputs[0])
+      xyz_group_links.new(xyz_geometry_node.outputs['Position'], xyz_mapping_node.inputs[0])
+      xyz_group_links.new(xyz_mapping_node.outputs[0], xyz_emission_node.inputs[0])
+      xyz_group_links.new(xyz_emission_node.outputs[0], xyz_group_output_node.inputs[0])
+      xyz_material_links.new(xyz_group_in_material.outputs[0], xyz_output_node.inputs[0])
+
+      xyz_group_output_node.inputs[0].name = 'XYZ Shader'
+      xyz_group.outputs[0].name = 'XYZ Shader'
+
+    def override_material_diffuse(material, node_group):
+
+      print('-'*60,material.name)
+      if material.node_tree is not None:
+        if material.node_tree.nodes.get('Material Output'):
+          override_material_output_node = material.node_tree.nodes['Material Output']
+        
+          override_xyz_group = material.node_tree.nodes.new('ShaderNodeGroup')
+          override_xyz_group.node_tree = node_group
+          override_xyz_group.location = (override_material_output_node.location[0]-300, override_material_output_node.location[1])
+
+          override_links = material.node_tree.links
+
+          override_links.new(override_xyz_group.outputs[0], override_material_output_node.inputs[0])
 
     # ------------------------------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------------------------------
@@ -145,6 +184,11 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
     # ------------------------------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------------------------------
 
+    # generate the XYZ materials with correct coordinates based on camera
     generate_xyz_material(self.XYZ_wtfscale, self.XYZ_groundheight, self.XYZ_groundheight_from_selected)
+
+    # add the XYZ group to every other material's diffuse channel
+    for material in bpy.data.materials:
+      override_material_diffuse(material, bpy.data.node_groups['XYZgroup'])
 
     return {'FINISHED'}
