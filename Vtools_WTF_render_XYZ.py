@@ -79,8 +79,18 @@ class WTF_render_XYZ(bpy.types.Operator):
 
         # change cache path
         bpy.context.scene.render.filepath = '//cache\\' + 'cache_' + new_scene_name + '\\' + 'cache_' + new_scene_name + '_'
+
+        # read the resolution and set it to double before rendering
+        resolution_multiplier = 2
+
+        resolution_percentage = bpy.context.scene.render.resolution_percentage
+        bpy.context.scene.render.resolution_percentage = resolution_percentage*resolution_multiplier
+        bpy.context.scene.render.tile_x = bpy.context.scene.render.resolution_x *resolution_multiplier
+        bpy.context.scene.render.tile_y = bpy.context.scene.render.resolution_y *resolution_multiplier
         # render      
         bpy.ops.render.render(animation=True)
+        # revert the resolution
+        bpy.context.scene.render.resolution_percentage = resolution_percentage
         print('View', i_2d, 'finished...')  
 
       # revert the original scene back as if nothing happened

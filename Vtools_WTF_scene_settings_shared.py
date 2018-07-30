@@ -9,26 +9,35 @@ class WTF_scene_settings_shared(bpy.types.Operator):
   def execute(self, context):
 
     def xyz_render_settings():
-      bpy.context.scene.render.engine = 'CYCLES'
+      scene = bpy.context.scene
+
+      scene.render.engine = 'CYCLES'
       #bpy.context.scene.render.engine = 'BLENDER_RENDER'
-      bpy.context.scene.view_settings.view_transform = 'Raw'
+      scene.view_settings.view_transform = 'Raw'
 
-      bpy.context.scene.render.image_settings.compression = 0
+      scene.render.image_settings.compression = 0
 
-      bpy.context.scene.cycles.samples = 1000
-      bpy.context.scene.cycles.max_bounces = 0
-      bpy.context.scene.cycles.min_bounces = 0
-      bpy.context.scene.cycles.diffuse_bounces = 0
-      bpy.context.scene.cycles.glossy_bounces = 0
-      bpy.context.scene.cycles.transmission_bounces = 0
-      bpy.context.scene.cycles.volume_bounces = 0
+      scene.cycles.samples = 1
+      scene.cycles.max_bounces = 0
+      scene.cycles.min_bounces = 0
+      scene.cycles.diffuse_bounces = 0
+      scene.cycles.glossy_bounces = 0
+      scene.cycles.transmission_bounces = 0
+      scene.cycles.volume_bounces = 0
 
-      bpy.context.scene.cycles.use_transparent_shadows = False
-      bpy.context.scene.cycles.caustics_reflective = False
-      bpy.context.scene.cycles.caustics_refractive = False
+      scene.cycles.use_transparent_shadows = False
+      scene.cycles.caustics_reflective = False
+      scene.cycles.caustics_refractive = False
 
-      bpy.context.scene.cycles.pixel_filter_type = 'GAUSSIAN'
-      bpy.context.scene.cycles.filter_width = 1.5
+      #scene.cycles.pixel_filter_type = 'GAUSSIAN'
+      #scene.cycles.pixel_filter_type = 'BLACKMAN_HARRIS'
+      #scene.cycles.filter_width = 0.01
+
+      scene.cycles.pixel_filter_type = 'BOX'
+
+
+      scene.render.tile_x = scene.render.resolution_x
+      scene.render.tile_y = scene.render.resolution_y
 
 
     def remove_lights():
