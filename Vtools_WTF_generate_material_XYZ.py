@@ -82,10 +82,23 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       camera_ground_target = camera_position - ( camera_vector * (camera_position[2] / camera_vector[2]))
       cam_offset = camera_ground_target
       #height_offset = bpy.context.scene.objects['HEIGHT'].location[2]
-      if XYZ_groundheight_from_selected == True:
-        height_offset = bpy.context.scene.objects.active.location[2]
-      else:
-        height_offset = XYZ_groundheight
+
+      # go through all objects and try to find XYZ-GROUND
+      ground_suffix = 'XYZ-GROUND-'
+      ground_suffix_length = len(ground_suffix)
+
+      ground_object_found = False
+      for ground_object in bpy.context.scene.objects:
+        if ground_object.name[:ground_suffix_length] == ground_suffix:
+          height_offset = ground_object.location[2]
+          XYZ_groundheight = height_offset
+
+      if ground_object_found == False:                  
+        if XYZ_groundheight_from_selected == True:
+          height_offset = bpy.context.scene.objects.active.location[2]
+        else:
+          height_offset = XYZ_groundheight
+
       print('Camera vector is:   ', camera_vector)
       print('Camera vector_1z is:', camera_vector_1z)
       print('Camera target is:   ', camera_ground_target)
@@ -177,6 +190,7 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
           override_links = material.node_tree.links
 
           override_links.new(override_xyz_group.outputs[0], override_material_output_node.inputs[0])
+
 
     # ------------------------------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------------------------------
