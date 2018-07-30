@@ -56,7 +56,7 @@ class WTF_render_XYZ(bpy.types.Operator):
     # save scene name before starting to change it
     original_scene_name = bpy.context.scene.name
     # iterate through frames and render each one individually
-    for f in range(frame_start, frame_end):
+    for f in range(frame_start, frame_end+1):
       # render just the individual frame
       bpy.context.scene.frame_start = f
       bpy.context.scene.frame_end = f
