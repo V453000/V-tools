@@ -14,7 +14,7 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
 
   XYZ_wtfscale = bpy.props.FloatProperty(
   name = 'Scale',
-  default = 32
+  default = 128
   )
   XYZ_groundheight = bpy.props.FloatProperty(
   name = 'Ground Height',

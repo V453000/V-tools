@@ -43,8 +43,8 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
 
       
       xyz_material_nodes = xyz_material.node_tree.nodes
-      xyz_group_nodes = xyz_group.nodes
       xyz_material_links = xyz_material.node_tree.links
+      xyz_group_nodes = xyz_group.nodes
       xyz_group_links = xyz_group.links
       
       # clean all nodes from both the material and the group
