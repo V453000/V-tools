@@ -35,9 +35,14 @@ class WTF_scene_settings_shared(bpy.types.Operator):
 
       scene.cycles.pixel_filter_type = 'BOX'
 
+      scene.render.image_settings.color_depth = '16'
 
-      scene.render.tile_x = scene.render.resolution_x
-      scene.render.tile_y = scene.render.resolution_y
+      if scene.cycles.device == 'CPU':
+        scene.render.tile_x = 64
+        scene.render.tile_y = 64
+      else:
+        scene.render.tile_x = scene.render.resolution_x
+        scene.render.tile_y = scene.render.resolution_y
 
 
     def remove_lights():
