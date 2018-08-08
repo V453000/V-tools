@@ -62,5 +62,22 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
     bpy.context.scene.Mtl_for_mat_replace = store_mtl
     bpy.context.scene.Obj_for_mat_replace = store_obj
 
+    # add Track To constraint to camera
+    for scene in bpy.data.scenes:
+      camera_obj = scene.camera
+      # find top parent
+      camera_boss_object = camera_obj
+      while(camera_boss_object.parent is not None):
+        camera_boss_object = camera_boss_object.parent
+      
+      if camera_obj.constraints.get('XYZ_TRACK_TO') is None:
+        track_to_constraint = camera_obj.constraints.new('TRACK_TO')
+        track_to_constraint.name       = 'XYZ_TRACK_TO'
+        track_to_constraint.target     = camera_boss_object
+        track_to_constraint.track_axis = 'TRACK_NEGATIVE_Z'
+        track_to_constraint.up_axis    = 'UP_Y'
+
+
+
 
     return {'FINISHED'}
