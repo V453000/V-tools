@@ -22,12 +22,12 @@ class WTF_render_XYZ(bpy.types.Operator):
     
     camera_angles = [
       ( 0              ),
-      ( math.pi* 8  /6 ),
-      ( math.pi* 16 /6 ),
+      ( math.pi* 4 /6 ),
+      ( math.pi* 8 /6 ),
 
-      ( math.pi* 4  /6 ),
-      ( math.pi* 12 /6 ),
-      ( math.pi* 20 /6 ),
+      ( math.pi* 6 /6 ),
+      ( math.pi* 10/6 ),
+      ( math.pi* 2 /6 ),
       
       ( math.pi/2      )
     ]
@@ -101,14 +101,11 @@ class WTF_render_XYZ(bpy.types.Operator):
         
         # rotate boss object
         camera_boss_object.rotation_euler[2] = camera_boss_object_original_rotation_matrix[2] + camera_angles[i]
-        print('Camera location after rotation', camera_obj.matrix_world.to_translation)
         
         # move camera in Z (rotation handled by constraint)
         if i == 3 or i == 4 or i == 5 :
-          print('Camera location before transform', camera_obj.matrix_world.to_translation)
-          
           camera_obj.matrix_world.translation[2] = camera_original_matrix.translation[2] /2
-          print('Camera location after transform', camera_obj.matrix_world.to_translation)
+
         else:
           camera_obj.matrix_world.translation[2] = camera_original_matrix.translation[2]
 
