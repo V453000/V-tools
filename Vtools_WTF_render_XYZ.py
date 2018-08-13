@@ -31,17 +31,7 @@ class WTF_render_XYZ(bpy.types.Operator):
       
       ( math.pi/2      )
     ]
-    camera_locations = [
-      ( 1, 1, 1   ),
-      ( 1, 1, 1   ),
-      ( 1, 1, 1   ),
-
-      ( 1, 1, 0.5 ),
-      ( 1, 1, 0.5 ),
-      ( 1, 1, 0.5 ),
-      
-      ( 0, 0, 1.5 ),
-    ]
+    
     # set render settings
     #bpy.ops.scene.xyz_convert_scene()
 
@@ -57,14 +47,16 @@ class WTF_render_XYZ(bpy.types.Operator):
     while(camera_boss_object.parent is not None):
       camera_boss_object = camera_boss_object.parent
 
+    
+    
     camera_obj.constraints['XYZ_TRACK_TO'].mute = True
-    camera_original_matrix = camera_obj.matrix_world
-    camera_boss_object_original_matrix = camera_boss_object.matrix_world
+    camera_original_matrix = camera_obj.matrix_world.copy()
+    camera_boss_object_original_matrix = camera_boss_object.matrix_world.copy()
     camera_obj.constraints['XYZ_TRACK_TO'].mute = False
 
-    camera_original_rotation = camera_obj.rotation_euler
-    camera_boss_object_original_rotation = camera_boss_object.rotation_euler
-    camera_boss_object_original_rotation_matrix = camera_boss_object.matrix_world.to_euler()
+    camera_original_rotation = camera_obj.rotation_euler.copy()
+    camera_boss_object_original_rotation = camera_boss_object.rotation_euler.copy()
+    camera_boss_object_original_rotation_matrix = camera_boss_object.matrix_world.to_euler().copy()
 
     # save starting frame
     frame_start = bpy.context.scene.frame_start
@@ -88,6 +80,7 @@ class WTF_render_XYZ(bpy.types.Operator):
 
     # iterate through frames and render each one individually
     for f in range(frame_start, frame_end+1):
+
       # render just the individual frame
       bpy.context.scene.frame_start = f
       bpy.context.scene.frame_end = f
@@ -95,9 +88,10 @@ class WTF_render_XYZ(bpy.types.Operator):
       bpy.context.scene.frame_set(f)
       # set XYZ settings for every frame (only useful when the camera has actually moved/rotated)
       bpy.ops.scene.wtf_scene_settings_xyz()
-      # iterate through XYZ views
+
+      # iterate through XYZ view
       for i in range(0, 7):
-        print(i, camera_angles[i])
+
         i_2d = format(i,'02d')
         # change scene name with i
         new_scene_name = original_scene_name + '_XYZ-' + str(i_2d)
@@ -107,15 +101,16 @@ class WTF_render_XYZ(bpy.types.Operator):
         
         # rotate boss object
         camera_boss_object.rotation_euler[2] = camera_boss_object_original_rotation_matrix[2] + camera_angles[i]
-
         print('Camera location after rotation', camera_obj.matrix_world.to_translation)
         
         # move camera in Z (rotation handled by constraint)
-        if i == 3:
+        if i == 3 or i == 4 or i == 5 :
           print('Camera location before transform', camera_obj.matrix_world.to_translation)
           
-          camera_obj.matrix_world.translation[2] /= 2
+          camera_obj.matrix_world.translation[2] = camera_original_matrix.translation[2] /2
           print('Camera location after transform', camera_obj.matrix_world.to_translation)
+        else:
+          camera_obj.matrix_world.translation[2] = camera_original_matrix.translation[2]
 
         if i == 6:
           camera_obj.matrix_world.translation[0] = camera_boss_object.matrix_world.translation[0]
@@ -125,8 +120,8 @@ class WTF_render_XYZ(bpy.types.Operator):
           # special handling for top view
           bpy.context.scene.camera.constraints['XYZ_TRACK_TO'].mute = True
 
-          loc_camera = camera_obj.matrix_world.to_translation()
-          target_point = camera_boss_object.matrix_world.to_translation()
+          loc_camera = camera_obj.matrix_world.to_translation().copy()
+          target_point = camera_boss_object.matrix_world.to_translation().copy()
           direction = target_point - loc_camera
           rot_quat = direction.to_track_quat('-Z', 'Y')
           camera_obj.rotation_euler = rot_quat.to_euler()
@@ -146,7 +141,6 @@ class WTF_render_XYZ(bpy.types.Operator):
         '''------------------------        ------------------------'''
         '''--------------------------------------------------------'''
 
-        
         # revert camera transforms
         #camera_obj.rotation_euler = camera_original_rotation
         #camera_boss_object.rotation_euler = camera_boss_object_original_rotation
@@ -156,11 +150,11 @@ class WTF_render_XYZ(bpy.types.Operator):
 
         # turn TrackTo constraint back on
         bpy.context.scene.camera.constraints['XYZ_TRACK_TO'].mute = True
-        camera_obj.matrix_world = camera_original_matrix
-        camera_boss_object.matrix_world = camera_boss_object_original_matrix
+        camera_boss_object.matrix_world = camera_boss_object_original_matrix.copy()
+        camera_obj.matrix_world = camera_original_matrix.copy()
         bpy.context.scene.camera.constraints['XYZ_TRACK_TO'].mute = False
-        camera_obj.rotation_euler = camera_original_rotation
-        camera_boss_object.rotation_euler = camera_boss_object_original_rotation
+        camera_boss_object.rotation_euler = camera_boss_object_original_rotation.copy()
+        camera_obj.rotation_euler = camera_original_rotation.copy()
   
         print('View', i_2d, 'finished...')  
       
