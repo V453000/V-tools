@@ -75,12 +75,16 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
           print('Y',camera_boss_object.parent)
           camera_boss_object = camera_boss_object.parent
         
+        
+        
         if camera_obj.constraints.get('XYZ_TRACK_TO') is None:
           track_to_constraint = camera_obj.constraints.new('TRACK_TO')
-          track_to_constraint.name       = 'XYZ_TRACK_TO'
-          track_to_constraint.target     = camera_boss_object
-          track_to_constraint.track_axis = 'TRACK_NEGATIVE_Z'
-          track_to_constraint.up_axis    = 'UP_Y'
+        else:
+          track_to_constraint = camera_obj.constraints['XYZ_TRACK_TO']
+        track_to_constraint.name       = 'XYZ_TRACK_TO'
+        track_to_constraint.target     = camera_boss_object
+        track_to_constraint.track_axis = 'TRACK_NEGATIVE_Z'
+        track_to_constraint.up_axis    = 'UP_Y'
 
 
 
