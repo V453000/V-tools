@@ -64,18 +64,23 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
 
     # add Track To constraint to camera
     for scene in bpy.data.scenes:
-      camera_obj = scene.camera
-      # find top parent
-      camera_boss_object = camera_obj
-      while(camera_boss_object.parent is not None):
-        camera_boss_object = camera_boss_object.parent
-      
-      if camera_obj.constraints.get('XYZ_TRACK_TO') is None:
-        track_to_constraint = camera_obj.constraints.new('TRACK_TO')
-        track_to_constraint.name       = 'XYZ_TRACK_TO'
-        track_to_constraint.target     = camera_boss_object
-        track_to_constraint.track_axis = 'TRACK_NEGATIVE_Z'
-        track_to_constraint.up_axis    = 'UP_Y'
+      # make sure the scene actually has a camera
+      if scene.camera is not None:
+        camera_obj = scene.camera
+        # find top parent
+        camera_boss_object = camera_obj
+        print('A',camera_boss_object)
+        while(camera_boss_object.parent is not None):
+          print('X',camera_boss_object)
+          print('Y',camera_boss_object.parent)
+          camera_boss_object = camera_boss_object.parent
+        
+        if camera_obj.constraints.get('XYZ_TRACK_TO') is None:
+          track_to_constraint = camera_obj.constraints.new('TRACK_TO')
+          track_to_constraint.name       = 'XYZ_TRACK_TO'
+          track_to_constraint.target     = camera_boss_object
+          track_to_constraint.track_axis = 'TRACK_NEGATIVE_Z'
+          track_to_constraint.up_axis    = 'UP_Y'
 
 
 
