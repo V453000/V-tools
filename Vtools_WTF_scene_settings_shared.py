@@ -57,8 +57,10 @@ class WTF_scene_settings_shared(bpy.types.Operator):
           remove_layer = False
           shadow_appendix = 'shadow'
           height_appendix = 'height'
+          mask_appendix = 'mask'
           shadow_appendix_count = len(shadow_appendix)
           height_appendix_count = len(height_appendix)
+          mask_appendix_count = len(mask_appendix)
 
           print(renderlayer.name[:shadow_appendix_count])
           # see if the layer needs to be removed
@@ -68,12 +70,17 @@ class WTF_scene_settings_shared(bpy.types.Operator):
           elif renderlayer.name[-height_appendix_count:].lower() == height_appendix.lower():
             if renderlayer.material_override is not None:
               remove_layer = True
+          elif renderlayer.name[-mask_appendix_count:].lower() == mask_appendix.lower():
+            remove_layer = True
+          
           if renderlayer.name[:shadow_appendix_count].lower() == shadow_appendix.lower():
             if renderlayer.use_pass_shadow == True:
               remove_layer = True
           elif renderlayer.name[:height_appendix_count].lower() == height_appendix.lower():
             if renderlayer.material_override is not None:
               remove_layer = True
+          elif renderlayer.name[:mask_appendix_count].lower() == mask_appendix.lower():
+            remove_layer = True
           # remove the layer if it should be removed
           if remove_layer == True:
             scene.render.layers.remove(renderlayer)
