@@ -25,6 +25,9 @@ class WTF_scene_settings_shared(bpy.types.Operator):
       scene.cycles.transmission_bounces = 0
       scene.cycles.volume_bounces = 0
 
+      scene.view_settings.exposure = 0
+      scene.view_settings.gamma = 1
+
       scene.cycles.use_transparent_shadows = False
       scene.cycles.caustics_reflective = False
       scene.cycles.caustics_refractive = False
