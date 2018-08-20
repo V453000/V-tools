@@ -27,6 +27,7 @@ class WTF_scene_settings_shared(bpy.types.Operator):
 
       scene.view_settings.exposure = 0
       scene.view_settings.gamma = 1
+      scene.view_settings.use_curve_mapping = False
 
       scene.cycles.use_transparent_shadows = False
       scene.cycles.caustics_reflective = False
