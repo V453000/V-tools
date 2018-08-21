@@ -1,5 +1,4 @@
 import bpy
-import numpy
 import mathutils
 import math
 pi = math.pi
@@ -46,28 +45,26 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       xyz_group_nodes = xyz_group.nodes
       xyz_group_links = xyz_group.links
 
-      ''' DOES NOT FUCKING WORK. YET.
-      # adding Settings node group reference to XYZ material node group
-      if bpy.data.node_groups['XYZgroup'].nodes.get('XYZ-settings') is None:
-        print('---------------------------------------------XYZ group not found in material, generating...')
-        xyz_setting_group_in_material = bpy.data.node_groups['XYZgroup'].nodes.new('ShaderNodeGroup')
-        xyz_setting_group_in_material.node_tree = bpy.data.node_groups['XYZ-settings']
-        xyz_setting_group_in_material.name  = 'XYZ-settings'
-        xyz_setting_group_in_material.label = 'XYZ-settings'
-        
-      else:
-        print('------------------------------------------------------XYZ group exists.')
-        xyz_setting_group_in_material = bpy.data.node_groups['XYZgroup'].nodes['XYZ-settings']
-        
-      
-      xyz_setting_group_in_material.location = (-300, 150)
-      '''
-
       # clean all nodes from both the material and the group
       for node in xyz_group_nodes:
         xyz_group_nodes.remove(node)
       for node in xyz_material_nodes:
         xyz_material_nodes.remove(node)
+
+      # adding XYZ-settings in the material group for easy access/visibility
+      if bpy.data.node_groups['XYZgroup'].nodes.get('XYZ-settings') is None:
+        print('---------------------------------------------XYZ group not found in material, generating...')
+        xyz_setting_group_in_material = bpy.data.node_groups['XYZgroup'].nodes.new('ShaderNodeGroup')
+        xyz_setting_group_in_material.node_tree = bpy.data.node_groups['XYZ-settings']
+        xyz_setting_group_in_material.name = 'XYZ-settings'
+        xyz_setting_group_in_material.label = 'XYZ-settings'    
+      else:
+        print('------------------------------------------------------XYZ group exists.')
+        xyz_setting_group_in_material = bpy.data.node_groups['XYZgroup'].nodes['XYZ-settings']
+      xyz_setting_group_in_material.location = (-100, 100)
+      xyz_setting_group_in_material.use_custom_color = True
+      xyz_setting_group_in_material.color = (1,0,1)
+      xyz_setting_group_in_material.width = 300
 
       xyz_group_in_material = xyz_material_nodes.new('ShaderNodeGroup')
       xyz_group_in_material.node_tree = xyz_group
