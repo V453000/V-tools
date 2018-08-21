@@ -36,8 +36,23 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
       scene.render.use_overwrite = False
       scene.render.use_placeholder = True
 
+    if bpy.data.node_groups.get('XYZ-settings') is None:
+      settings_group = bpy.data.node_groups.new(name = 'XYZ-settings', type = 'ShaderNodeTree')
+    else:
+      settings_group = bpy.data.node_groups['XYZ-settings']
+    
+    if settings_group.nodes.get('XYZ-settings-scale') is None:
+      settings_scale_node = settings_group.nodes.new('ShaderNodeValue')
+      settings_scale_node.name =  'XYZ-settings-scale'
+      settings_scale_node.label = 'XYZ-settings-scale'
+      settings_scale_node.outputs[0].default_value = 128
+    else:
+      settings_scale_node = settings_group.nodes['XYZ-settings-scale']
+
+    settings_scale = settings_scale_node.outputs[0].default_value
+
     # generate material
-    bpy.ops.scene.wtf_generate_material_xyz(XYZ_wtfscale = self.XYZ_wtfscale, XYZ_groundheight = self.XYZ_groundheight, XYZ_groundheight_from_selected = self.XYZ_groundheight_from_selected)
+    bpy.ops.scene.wtf_generate_material_xyz(XYZ_wtfscale = settings_scale, XYZ_groundheight = self.XYZ_groundheight, XYZ_groundheight_from_selected = self.XYZ_groundheight_from_selected)
 
     # set material override on all RenderLayers
     for scene in bpy.data.scenes:

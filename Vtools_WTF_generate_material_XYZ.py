@@ -41,12 +41,28 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       else:
         xyz_group = bpy.data.node_groups['XYZgroup']
 
-      
       xyz_material_nodes = xyz_material.node_tree.nodes
       xyz_material_links = xyz_material.node_tree.links
       xyz_group_nodes = xyz_group.nodes
       xyz_group_links = xyz_group.links
+
+      ''' DOES NOT FUCKING WORK. YET.
+      # adding Settings node group reference to XYZ material node group
+      if bpy.data.node_groups['XYZgroup'].nodes.get('XYZ-settings') is None:
+        print('---------------------------------------------XYZ group not found in material, generating...')
+        xyz_setting_group_in_material = bpy.data.node_groups['XYZgroup'].nodes.new('ShaderNodeGroup')
+        xyz_setting_group_in_material.node_tree = bpy.data.node_groups['XYZ-settings']
+        xyz_setting_group_in_material.name  = 'XYZ-settings'
+        xyz_setting_group_in_material.label = 'XYZ-settings'
+        
+      else:
+        print('------------------------------------------------------XYZ group exists.')
+        xyz_setting_group_in_material = bpy.data.node_groups['XYZgroup'].nodes['XYZ-settings']
+        
       
+      xyz_setting_group_in_material.location = (-300, 150)
+      '''
+
       # clean all nodes from both the material and the group
       for node in xyz_group_nodes:
         xyz_group_nodes.remove(node)
@@ -55,6 +71,8 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
 
       xyz_group_in_material = xyz_material_nodes.new('ShaderNodeGroup')
       xyz_group_in_material.node_tree = xyz_group
+      xyz_group_in_material.name = 'XYZ_material_group'
+      xyz_group_in_material.label = 'XYZ_material_group'
 
       # add nodes
       loc_x = 0
@@ -182,9 +200,15 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       if material.node_tree is not None:
         if material.node_tree.nodes.get('Material Output'):
           override_material_output_node = material.node_tree.nodes['Material Output']
-        
-          override_xyz_group = material.node_tree.nodes.new('ShaderNodeGroup')
-          override_xyz_group.node_tree = node_group
+
+          if material.node_tree.nodes.get('XYZ_material_group') is None:
+            override_xyz_group = material.node_tree.nodes.new('ShaderNodeGroup')
+            override_xyz_group.node_tree = node_group
+            override_xyz_group.name = 'XYZ_material_group'
+            override_xyz_group.label = 'XYZ_material_group'
+          else:
+            override_xyz_group = material.node_tree.nodes['XYZ_material_group']
+
           override_xyz_group.location = (override_material_output_node.location[0]-300, override_material_output_node.location[1])
 
           override_links = material.node_tree.links
