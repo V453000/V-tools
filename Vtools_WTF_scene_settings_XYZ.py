@@ -58,6 +58,7 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
     for scene in bpy.data.scenes:
       for renderlayer in scene.render.layers:
         renderlayer.material_override = bpy.data.materials['XYZmap']
+        renderlayer.cycles.use_denoising = False
         #'''
         #Disabled because every material is getting the node group.
         #''' not disabled atm
