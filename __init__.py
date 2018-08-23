@@ -53,6 +53,7 @@ if "bpy" in locals():
     importlib.reload(Vtools_WTF_scene_settings_NRM)
     importlib.reload(Vtools_WTF_render_XYZ)
     importlib.reload(Vtools_WTF_set_XYZ_ground)
+    importlib.reload(Vtools_WTF_create_camera_helper)
 
     importlib.reload(Vtools_XYZ_convert_scene)
 
@@ -83,6 +84,7 @@ if "bpy" in locals():
   from . import Vtools_WTF_scene_settings_NRM
   from . import Vtools_WTF_render_XYZ
   from . import Vtools_WTF_set_XYZ_ground
+  from . import Vtools_WTF_create_camera_helper
 
   from . import Vtools_XYZ_convert_scene
 
@@ -114,6 +116,7 @@ WTF_scene_settings_XYZ    =      Vtools_WTF_scene_settings_XYZ.WTF_scene_setting
 WTF_scene_settings_NRM    =      Vtools_WTF_scene_settings_NRM.WTF_scene_settings_NRM
 WTF_render_XYZ =                 Vtools_WTF_render_XYZ.WTF_render_XYZ
 WTF_set_XYZ_ground =             Vtools_WTF_set_XYZ_ground.WTF_set_XYZ_ground
+WTF_create_camera_helper =       Vtools_WTF_create_camera_helper.WTF_create_camera_helper
 
 XYZ_convert_scene =       Vtools_XYZ_convert_scene.XYZ_convert_scene
 
@@ -186,12 +189,14 @@ class tool_panel_XYZ(bpy.types.Panel):
     #row.operator('scene.wtf_generate_material_xyz'    , text = 'Mtl'    , icon = 'RADIO'              )
     #row.operator('scene.wtf_generate_material_nrm'    , text = 'Mtl'    , icon = 'MATCAP_23'          )
     row2 = layout.row()
-    row2.operator('scene.wtf_scene_settings_xyz'       , text = 'Set XYZ'    , icon = 'RADIO'              )
-    row2.operator('scene.wtf_scene_settings_nrm'       , text = 'Set NRM'    , icon = 'MATCAP_23'          )
+    row2.operator('scene.wtf_scene_settings_xyz'       , text = 'Set XYZ'    , icon = 'MATCAP_23'              )
+    #row2.operator('scene.wtf_scene_settings_nrm'       , text = 'Set NRM'    , icon = 'MATCAP_23'          )
     row3 = layout.row()
-    row3.operator('scene.wtf_set_xyz_ground'           , text = 'Set XYZ Ground'  , icon = 'RADIO'         )
+    row3.operator('scene.wtf_create_camera_helper'     , text = 'Add Cam Helper' , icon = 'OUTLINER_OB_CAMERA' )
     row4 = layout.row()
-    row4.operator('scene.wtf_render_xyz'               , text = 'XYZ Render'      , icon = 'RADIO'         )
+    row4.operator('scene.wtf_set_xyz_ground'           , text = 'Set XYZ Ground'  , icon = 'MESH_PLANE'    )
+    row5 = layout.row()
+    row5.operator('scene.wtf_render_xyz'               , text = 'XYZ Render'      , icon = 'RADIO'         )
 
 
 
@@ -384,6 +389,7 @@ def register():
   bpy.utils.register_class(WTF_scene_settings_NRM      )
   bpy.utils.register_class(WTF_render_XYZ              )
   bpy.utils.register_class(WTF_set_XYZ_ground          )
+  bpy.utils.register_class(WTF_create_camera_helper    )
 
   bpy.utils.register_class(XYZ_convert_scene)
 
@@ -436,6 +442,7 @@ def unregister():
   bpy.utils.unregister_class(WTF_scene_settings_NRM      )
   bpy.utils.unregister_class(WTF_render_XYZ              )
   bpy.utils.unregister_class(WTF_set_XYZ_ground          )
+  bpy.utils.unregister_class(WTF_create_camera_helper    )
 
   bpy.utils.unregister_class(XYZ_convert_scene)
 
