@@ -84,11 +84,42 @@ class WTF_create_camera_helper(bpy.types.Operator):
 
         # with the found object name, create the object data and link it to the current scene
         camera_line_obj_new = bpy.data.objects.new(camera_line_obj_name, line_mesh)
-        scene_camera_line_obj = bpy.context.scene.objects.link(camera_line_obj_new)
+        line_helper_obj = bpy.context.scene.objects.link(camera_line_obj_new)
 
-        scene_camera_line_obj_name = scene_camera_line_obj.object.name
-        bpy.context.scene.objects[scene_camera_line_obj_name].parent = bpy.context.scene.camera
+        
 
+      if line_helper_obj.object.vertex_groups.get('END') is None:
+        end_vertex_group = line_helper_obj.object.vertex_groups.new(name = 'END')
+      else:
+        end_vertex_group = line_helper_obj.object.vertex_groups.get('END')
+      end_vertex_group.add([1], 1.0, 'ADD') #vertex id, weight, mode
+
+      
+      if line_helper_obj.object.modifiers.get('TARGET-HOOK') == None:
+        line_helper_hook_mod = line_helper_obj.object.modifiers.new(type = 'HOOK', name = 'TARGET-HOOK')
+        
+        # add empty object for hook, see if its name already exists
+        hook_empty_base_name = 'TARGET-HOOK-EMPTY'     
+        hook_empty_name = hook_empty_base_name
+        hook_empty_number = 0
+        while(bpy.data.objects.get(hook_empty_name) is not None):
+          hook_empty_number += 1
+          hook_empty_name = hook_empty_base_name + '.' + format(int(hook_empty_number), '03d')
+        # add the object and link it to scene
+        hook_empty_obj_new = bpy.data.objects.new(hook_empty_name, None)
+        target_hook_empty_baseobj = bpy.context.scene.objects.link(hook_empty_obj_new)
+
+        # move the target empty to the same position as the vertex it hooks
+        target_hook_empty_baseobj.object.location[2] = -1
+        # assign the empty to the hook modifier
+        line_helper_hook_mod.object = target_hook_empty_baseobj.object
+        line_helper_hook_mod.vertex_group = end_vertex_group.name
+        
+      else:
+        line_helper_hook_mod = line_helper_obj.object.modifiers.get('TARGET-HOOK')
+      
+      #bpy.context.scene.objects[line_helper_obj.object.name].parent = bpy.context.scene.camera
+      
     
 
 
