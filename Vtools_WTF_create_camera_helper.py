@@ -43,7 +43,8 @@ class WTF_create_camera_helper(bpy.types.Operator):
       '''camera_line_obj = bpy.data.objects.new(camera_line_name, line_mesh)#unused'''
     # if it exists, assign it to camera_line_obj for later use
     else:
-      camera_line_obj = bpy.data.objects[camera_line_name]
+      line_mesh = bpy.data.meshes[camera_line_name]
+      '''camera_line_obj = bpy.data.objects[camera_line_name]#unused'''
       print(camera_line_name, 'already exists, proceeding...')
     
     ''' old trash
@@ -82,8 +83,7 @@ class WTF_create_camera_helper(bpy.types.Operator):
           camera_line_obj_name = camera_line_name + '.' + format(int(camera_line_obj_number), '03d')
 
         # with the found object name, create the object data and link it to the current scene
-        camera_line_obj_name_with_number = camera_line_name + '.' + str(camera_line_obj_name)
-        camera_line_obj_new = bpy.data.objects.new(camera_line_obj_name_with_number, line_mesh)
+        camera_line_obj_new = bpy.data.objects.new(camera_line_obj_name, line_mesh)
         scene_camera_line_obj = bpy.context.scene.objects.link(camera_line_obj_new)
 
         scene_camera_line_obj_name = scene_camera_line_obj.object.name
