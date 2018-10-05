@@ -101,8 +101,18 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
         track_to_constraint.target     = camera_boss_object
         track_to_constraint.track_axis = 'TRACK_NEGATIVE_Z'
         track_to_constraint.up_axis    = 'UP_Y'
-
-
+    
+    bpy.ops.scene.wtf_generate_material_nrm()
+    # duplicate all remaining render layers and add -XYZ-Normalmap instead of -copy
+    for scene in bpy.data.scenes:
+      # create a list of render layers (otherwise it iterates over new ones too)
+      renderlayer_list = []
+      for renderlayer in scene.render.layers:
+        renderlayer_list.append(renderlayer.name)
+      for renderlayer_name in renderlayer_list:
+        scene.render.layers.active = scene.render.layers[renderlayer_name]
+        bpy.ops.scene.duplicate_render_layer(set_appendix = '-Normalmap')
+        scene.render.layers[renderlayer_name+'-Normalmap'].material_override = bpy.data.materials['Normalmap']
 
 
     return {'FINISHED'}

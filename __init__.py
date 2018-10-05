@@ -254,6 +254,7 @@ class render_layer_panel(bpy.types.Panel):
 
   def draw(self,context):
     layout = self.layout
+    layout.operator('scene.duplicate_render_layer'  , text = 'Duplicate Render Layer' , icon = 'RENDERLAYERS'       )
     layout.operator('nodes.generate_render_nodes'   , text = 'Generate Render Nodes'  , icon = 'NODETREE'           )
 
 class material_panel(bpy.types.Panel):
