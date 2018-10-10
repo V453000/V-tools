@@ -11,20 +11,50 @@ class duplicate_render_layer(bpy.types.Operator):
     description = 'Text added to the end of the duplicated RenderLayer.',
     default = '-copy'
   )
+  set_target_scene = bpy.props.StringProperty(
+    name = 'Target scene name',
+    description = 'Name of target scene.',
+    default = ''
+  )
+  set_source_scene = bpy.props.StringProperty(
+    name = 'Source scene',
+    description = 'Name of scene to copy from.',
+    default = ''
+  )
+  set_source_render_layer = bpy.props.StringProperty(
+    name = 'Source render layer',
+    description = 'Name of render layer to copy.',
+    default = ''
+  )
 
   def execute(self, context):
-    scene = bpy.context.scene
+    if self.set_source_scene == '':
+      scene = bpy.context.scene
+    else:
+      scene = bpy.data.scenes[self.set_source_scene]
     render_layers = scene.render.layers
 
+    if self.set_target_scene == '':
+      target_scene = bpy.context.scene
+    else:
+      target_scene = bpy.data.scenes[self.set_target_scene]
+
     # read selected renderlayer
-    selected_render_layer = render_layers.active
+    if self.set_source_render_layer == '':
+      selected_render_layer = render_layers.active
+    else:
+      selected_render_layer = scene.render.layers[self.set_source_render_layer]
+
+
     original_name = selected_render_layer.name
     copy_name = original_name + self.set_appendix
-    render_layers.new(copy_name)
+    
+    target_render_layers = target_scene.render.layers
+    target_render_layers.new(copy_name)
 
 
     original = render_layers[original_name]
-    copy = render_layers[copy_name]
+    copy = target_render_layers[copy_name]
 
     # layer settings
     for i in range(0,20):
