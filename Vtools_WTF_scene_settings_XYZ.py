@@ -110,8 +110,9 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
       for renderlayer in scene.render.layers:
         renderlayer_list.append(renderlayer.name)
       for renderlayer_name in renderlayer_list:
-        scene.render.layers.active = scene.render.layers[renderlayer_name]
-        bpy.ops.scene.duplicate_render_layer(set_appendix = '-Normalmap')
+        render_layer = scene.render.layers[renderlayer_name]
+        bpy.ops.scene.duplicate_render_layer(set_appendix = '-Normalmap', set_source_render_layer = render_layer.name, set_source_scene = scene.name, set_target_scene = scene.name)
+        print(scene.name, 'is XJXJFJIFY SCENE NAME')
         scene.render.layers[renderlayer_name+'-Normalmap'].material_override = bpy.data.materials['Normalmap']
 
 
