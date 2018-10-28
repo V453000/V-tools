@@ -74,6 +74,11 @@ class generate_render_nodes(bpy.types.Operator):
     description = 'Choose whether the function should remove existing nodes, or only add new.',
     default = True
   )
+  regenerate_shadow_shitter = bpy.props.BoolProperty(
+    name = 'Regenerate Shadow Shitter',
+    description = 'Delete the nodes in current Shadow Shitter and create new ones.',
+    default = False
+  )
   generate_postprocessing = bpy.props.BoolProperty(
     name = 'Generate Postprocessing',
     description = 'Automatically create a new POSTPROCESS scene which automatically imports the render outputs.',
@@ -216,7 +221,10 @@ class generate_render_nodes(bpy.types.Operator):
           render_layer.material_override = bpy.data.materials['HEIGHT']
 
 
-
+    # destroy shadow shitter if desired by settings
+    if self.regenerate_shadow_shitter == True:
+      if bpy.data.node_groups.get('ShadowShitter') is not None:
+        bpy.data.node_groups.remove(bpy.data.node_groups['ShadowShitter'])
     # check if ShadowShitter exists, if not, create it
     nodes = bpy.context.scene.node_tree.nodes
     if bpy.data.node_groups.get('ShadowShitter') is None:
@@ -229,21 +237,32 @@ class generate_render_nodes(bpy.types.Operator):
 
       shadow_shitter.outputs.new('NodeSocketFloat', 'Shadow')
       output_node = shadow_shitter.nodes.new('NodeGroupOutput')
-      output_node.location = (400,0)
+      output_node.location = (600,0)
 
-      subtract_node = shadow_shitter.nodes.new(type="CompositorNodeMixRGB")
-      subtract_node.name = 'ShadowShitter-subtract-node'
-      subtract_node.label = 'ShadowShitter-subtract-node'
-      subtract_node.location = (0,0)
-      subtract_node.blend_type = 'SUBTRACT'
+      #subtract_node = shadow_shitter.nodes.new(type="CompositorNodeMixRGB")
+      #subtract_node.name = 'ShadowShitter-subtract-node'
+      #subtract_node.label = 'ShadowShitter-subtract-node'
+      #subtract_node.location = (0,0)
+      #subtract_node.blend_type = 'SUBTRACT'
+
+      alpha_over_node = shadow_shitter.nodes.new(type="CompositorNodeAlphaOver")
+      alpha_over_node.name = 'ShadowShitter-alpha-over-node'
+      alpha_over_node.label = 'ShadowShitter-alpha-over-node'
+      alpha_over_node.location = (0,0)
+
+      invert_node = shadow_shitter.nodes.new(type="CompositorNodeInvert")
+      invert_node.name = 'ShadowShitter-invert-node'
+      invert_node.label = 'ShadowShitter-invert-node'
+      invert_node.location = (200,0)
 
       set_alpha_node = shadow_shitter.nodes.new(type="CompositorNodeSetAlpha")
       set_alpha_node.name = 'ShadowShitter-set-alpha-node'
       set_alpha_node.label = 'ShadowShitter-set-alpha-node'
-      set_alpha_node.location = (200,0)
+      set_alpha_node.location = (400,0)
 
-      shadow_shitter.links.new(input_node.outputs[0], subtract_node.inputs[2])
-      shadow_shitter.links.new(subtract_node.outputs[0], set_alpha_node.inputs[1])
+      shadow_shitter.links.new(input_node.outputs[0], alpha_over_node.inputs[2])
+      shadow_shitter.links.new(alpha_over_node.outputs[0], invert_node.inputs[1])
+      shadow_shitter.links.new(invert_node.outputs[0], set_alpha_node.inputs[1])
       shadow_shitter.links.new(set_alpha_node.outputs[0], output_node.inputs[0])
       print('ShadowShitter successfully created!')
 
