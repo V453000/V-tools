@@ -33,6 +33,7 @@ if "bpy" in locals():
     importlib.reload(Vtools_link_mesh_data)
     importlib.reload(Vtools_clean_material_slots)
     importlib.reload(Vtools_unpack_images)
+    importlib.reload(Vtools_relink_images)
     importlib.reload(Vtools_object_cycles_settings)
     importlib.reload(Vtools_object_lock_transforms)
     importlib.reload(Vtools_subsurf_settings)
@@ -64,6 +65,7 @@ if "bpy" in locals():
   from . import Vtools_link_mesh_data
   from . import Vtools_clean_material_slots
   from . import Vtools_unpack_images
+  from . import Vtools_relink_images
   from . import Vtools_object_cycles_settings
   from . import Vtools_object_lock_transforms
   from . import Vtools_subsurf_settings
@@ -95,6 +97,7 @@ generate_render_nodes =   Vtools_generate_render_nodes.generate_render_nodes
 link_mesh_data =          Vtools_link_mesh_data.link_mesh_data
 clean_material_slots =    Vtools_clean_material_slots.clean_material_slots
 unpack_images =           Vtools_unpack_images.unpack_images
+relink_images =           Vtools_relink_images.relink_images
 object_cycles_settings =  Vtools_object_cycles_settings.object_cycles_settings
 object_lock_transforms =  Vtools_object_lock_transforms.object_lock_transforms
 subsurf_settings =        Vtools_subsurf_settings.subsurf_settings
@@ -138,6 +141,7 @@ class tool_panel_blend(bpy.types.Panel):
     layout = self.layout
     layout.operator('blend.save_backup'             , text = 'Save Backup'            , icon = 'SAVE_COPY'          )
     layout.operator('scene.unpack_images'           , text = 'Unpack Images'          , icon = 'IMAGE_COL'          )
+    layout.operator('scene.relink_images'           , text = 'Relink Images'          , icon = 'SORTBYEXT'          )
 
 class tool_panel_scene(bpy.types.Panel):
   bl_space_type = 'VIEW_3D'
@@ -372,6 +376,7 @@ def register():
   bpy.utils.register_class(link_mesh_data)
   bpy.utils.register_class(clean_material_slots)
   bpy.utils.register_class(unpack_images)
+  bpy.utils.register_class(relink_images)
   bpy.utils.register_class(object_cycles_settings)
   bpy.utils.register_class(object_lock_transforms)
   bpy.utils.register_class(subsurf_settings)
@@ -425,6 +430,7 @@ def unregister():
   bpy.utils.unregister_class(link_mesh_data)
   bpy.utils.unregister_class(clean_material_slots)
   bpy.utils.unregister_class(unpack_images)
+  bpy.utils.unregister_class(relink_images)
   bpy.utils.unregister_class(object_cycles_settings)
   bpy.utils.unregister_class(object_lock_transforms)
   bpy.utils.unregister_class(subsurf_settings)
