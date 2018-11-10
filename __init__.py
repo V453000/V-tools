@@ -44,6 +44,7 @@ if "bpy" in locals():
     importlib.reload(Vtools_layered_transfer_paste)
     importlib.reload(Vtools_link_material_to)
     importlib.reload(Vtools_duplicate_render_layer)
+    importlib.reload(Vtools_object_unlock)
 
     importlib.reload(Vtools_material_replace)
 
@@ -76,6 +77,7 @@ if "bpy" in locals():
   from . import Vtools_layered_transfer_paste
   from . import Vtools_link_material_to
   from . import Vtools_duplicate_render_layer
+  from . import Vtools_object_unlock
 
   from . import Vtools_material_replace
 
@@ -108,6 +110,7 @@ layered_transfer_copy =   Vtools_layered_transfer_copy.layered_transfer_copy
 layered_transfer_paste =  Vtools_layered_transfer_paste.layered_transfer_paste
 link_material_to =        Vtools_link_material_to.link_material_to
 duplicate_render_layer =  Vtools_duplicate_render_layer.duplicate_render_layer
+object_unlock =           Vtools_object_unlock.object_unlock
 
 material_replace =        Vtools_material_replace.material_replace
 material_replace_panel =  Vtools_material_replace.material_replace_panel
@@ -166,6 +169,7 @@ class tool_panel_object(bpy.types.Panel):
   def draw(self,context):
     layout = self.layout
     layout.operator('object.draw_mode'              , text = 'Draw mode'               , icon = 'WIRE'               )
+    layout.operator('object.object_unlock'          , text = 'Viewport settings'       , icon = 'RESTRICT_SELECT_ON' )
     layout.operator('object.object_cycles_settings' , text = 'Cycles Settings'         , icon = 'RESTRICT_RENDER_ON' )
     layout.operator('object.object_lock_transforms' , text = 'Lock Transforms'         , icon = 'LOCKED'             )
     layout.operator('object.subsurf_settings'       , text = 'Subsurf Settings'        , icon = 'MOD_SUBSURF'        )
@@ -287,13 +291,16 @@ class object_panel(bpy.types.Panel):
 
   def draw(self,context):
     layout = self.layout
-    layout.operator('object.draw_mode'             , text = 'Object Draw Mode'         , icon = 'WIRE'                )
-    layout.operator('object.object_cycles_settings', text = 'Object Cycles Settings'   , icon = 'RESTRICT_RENDER_ON'  )
-    layout.operator('object.object_lock_transforms', text = 'Object Lock Transforms'   , icon = 'LOCKED'              )
-    layout.operator('object.subsurf_settings'      , text = 'Subsurf Settings'         , icon = 'MOD_SUBSURF'         )
-    layout.operator('object.link_to_all_scenes'    , text = 'Link to All Scenes'       , icon = 'LINK_AREA'           )
-    layout.operator('object.delete_from_all_scenes', text = 'Delete From All Scenes'   , icon = 'X'                   )
-    layout.operator('object.link_mesh_data'        , text = 'Link Identical Mesh Data' , icon = 'MOD_TRIANGULATE'     )
+    layout.operator('object.draw_mode'              , text = 'Draw mode'               , icon = 'WIRE'               )
+    layout.operator('object.object_unlock'          , text = 'Viewport settings'       , icon = 'RESTRICT_SELECT_ON' )
+    layout.operator('object.object_cycles_settings' , text = 'Cycles Settings'         , icon = 'RESTRICT_RENDER_ON' )
+    layout.operator('object.object_lock_transforms' , text = 'Lock Transforms'         , icon = 'LOCKED'             )
+    layout.operator('object.subsurf_settings'       , text = 'Subsurf Settings'        , icon = 'MOD_SUBSURF'        )
+    layout.operator('object.clean_material_slots'   , text = 'Clean Material Slots'    , icon = 'MATERIAL'           )
+    layout.operator('object.link_to_all_scenes'     , text = 'Link to All Scenes'      , icon = 'LINK_AREA'          )
+    layout.operator('object.delete_from_all_scenes' , text = 'Delete From All Scenes'  , icon = 'X'                  )
+    layout.operator('object.link_mesh_data'         , text = 'Link Identical Mesh Data', icon = 'MOD_TRIANGULATE'    )
+    layout.operator('object.link_material_to'       , text = 'Link Material to...'     , icon = 'LINKED'             )
     row = layout.row()
     row.operator('object.layered_transfer_copy'     , text = 'Layered Transfer COPY'   , icon = 'COPYDOWN'           )
     row.operator('object.layered_transfer_paste'    , text = 'Layered Transfer PASTE'  , icon = 'PASTEDOWN'          )
@@ -387,6 +394,7 @@ def register():
   bpy.utils.register_class(layered_transfer_paste)
   bpy.utils.register_class(link_material_to)
   bpy.utils.register_class(duplicate_render_layer)
+  bpy.utils.register_class(object_unlock)
 
   bpy.utils.register_class(WTF_generate_material_XYZ   )
   bpy.utils.register_class(WTF_generate_material_NRM   )
@@ -441,6 +449,7 @@ def unregister():
   bpy.utils.unregister_class(layered_transfer_paste)
   bpy.utils.unregister_class(link_material_to)
   bpy.utils.unregister_class(duplicate_render_layer)
+  bpy.utils.unregister_class(object_unlock)
 
   bpy.utils.unregister_class(WTF_generate_material_XYZ   )
   bpy.utils.unregister_class(WTF_generate_material_NRM   )
