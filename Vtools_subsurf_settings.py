@@ -11,27 +11,54 @@ class subsurf_settings(bpy.types.Operator):
     name = 'Mode',
     description = 'Subdivision Algorithm',
     items = [
-      ('CATMULL_CLARK', 'Catmull-Clark',''),
-      ('SIMPLE', 'Simple','')
+      #identifier        #name           #descript  #icon         #ID
+      ('Unchanged'    , 'Unchanged'     ,''      , 'PANEL_CLOSE' , 0),
+      ('CATMULL_CLARK', 'Catmull-Clark' ,''      , 'MATSPHERE'   , 1),
+      ('SIMPLE'       , 'Simple'        ,''      , 'MATCUBE'     , 2)
     ]
   )
-  subsurf_render_visibility = bpy.props.BoolProperty(
-    name = 'Render Visibility',
-    default = True
+
+
+  subsurf_render_visibility = bpy.props.EnumProperty(
+    name = 'Render visibility',
+    description = 'Render visibility',
+    items = [
+      #identifier      #name          #descript  #icon     #ID
+      ('Unchanged'   , 'Unchanged'   ,''      , 'PANEL_CLOSE'   , 0),
+      ('ON'          , 'ON'          ,''      , 'RESTRICT_RENDER_OFF'   , 1),
+      ('OFF'         , 'OFF'         ,''      , 'RESTRICT_RENDER_ON'   , 2)
+    ]
   )
-  subsurf_viewport_visibility = bpy.props.BoolProperty(
+  subsurf_viewport_visibility = bpy.props.EnumProperty(
     name = 'Viewport Visibility',
-    default = True
+    description = 'Viewport Visibility',
+    items = [
+      #identifier      #name          #descript  #icon     #ID
+      ('Unchanged'   , 'Unchanged'   ,''      , 'PANEL_CLOSE'   , 0),
+      ('ON'          , 'ON'          ,''      , 'RESTRICT_VIEW_OFF'   , 1),
+      ('OFF'         , 'OFF'         ,''      , 'RESTRICT_VIEW_ON'   , 2)
+    ]
   )
-  subsurf_editmode_visibility = bpy.props.BoolProperty(
+  subsurf_editmode_visibility = bpy.props.EnumProperty(
     name = 'Edit Mode Visibility',
-    default = True
+    description = 'Edit Mode Visibility',
+    items = [
+      #identifier      #name          #descript  #icon     #ID
+      ('Unchanged'   , 'Unchanged'   ,''      , 'PANEL_CLOSE'   , 0),
+      ('ON'          , 'ON'          ,''      , 'EDITMODE_HLT'   , 1),
+      ('OFF'         , 'OFF'         ,''      , 'SNAP_VERTEX'   , 2)
+    ]
   )
-  subsurf_cage_visibility = bpy.props.BoolProperty(
+  subsurf_cage_visibility = bpy.props.EnumProperty(
     name = 'On Cage Visibility',
-    default = True
+    description = 'On Cage Visibility',
+    items = [
+      #identifier      #name          #descript  #icon     #ID
+      ('Unchanged'   , 'Unchanged'   ,''      , 'PANEL_CLOSE'   , 0),
+      ('ON'          , 'ON'          ,''      , 'OUTLINER_DATA_MESH'   , 1),
+      ('OFF'         , 'OFF'         ,''      , 'OUTLINER_DATA_EMPTY'   , 2)
+    ]
   )
-  
   
   subsurf_change_levels = bpy.props.BoolProperty(
     name = 'ChangeViewport Levels',
@@ -57,6 +84,22 @@ class subsurf_settings(bpy.types.Operator):
     name = 'Adaptive Subdivision',
     default = False
   )
+  subsurf_adaptive_subdivision = bpy.props.EnumProperty(
+    name = 'Adaptive Subdivision',
+    description = 'Adaptive Subdivision',
+    items = [
+      #identifier      #name          #descript  #icon     #ID
+      ('Unchanged'   , 'Unchanged'   ,''      , 'PANEL_CLOSE'   , 0),
+      ('ON'          , 'ON'          ,''      , 'PROP_ON'   , 1),
+      ('OFF'         , 'OFF'         ,''      , 'PROP_OFF'   , 2)
+    ]
+  )
+
+
+  subsurf_change_adaptive_dicing_rate = bpy.props.BoolProperty(
+    name = 'Change Adaptive Dicing Rate',
+    default = False
+  )
   subsurf_adaptive_dicing_rate = bpy.props.FloatProperty(
     name = 'Adaptive Dicing Rate',
     default = 1.0
@@ -75,11 +118,34 @@ class subsurf_settings(bpy.types.Operator):
         for modifier in obj.modifiers:
           if modifier.type == "SUBSURF":
             subsurf_found = True
-            modifier.subdivision_type = self.subsurf_algorithm
-            modifier.show_render =      self.subsurf_render_visibility
-            modifier.show_viewport =    self.subsurf_viewport_visibility
-            modifier.show_in_editmode = self.subsurf_editmode_visibility
-            modifier.show_on_cage =     self.subsurf_cage_visibility
+            
+            if self.subsurf_algorithm != 'Unchanged':
+              modifier.subdivision_type = self.subsurf_algorithm
+
+            if self.subsurf_render_visibility != 'Unchanged':
+              if self.subsurf_render_visibility == 'ON':
+                modifier.show_render =      True
+              if self.subsurf_render_visibility == 'OFF':
+                modifier.show_render =      False
+
+            if self.subsurf_viewport_visibility != 'Unchanged':
+              if self.subsurf_viewport_visibility == 'ON':
+                modifier.show_viewport =    True
+              if self.subsurf_viewport_visibility == 'OFF':
+                modifier.show_viewport =    False
+
+            if self.subsurf_editmode_visibility != 'Unchanged':
+              if self.subsurf_editmode_visibility == 'ON':
+                modifier.show_in_editmode = True
+              if self.subsurf_editmode_visibility == 'OFF':
+                modifier.show_in_editmode = False
+
+            if self.subsurf_cage_visibility != 'Unchanged':
+              if self.subsurf_cage_visibility == 'ON':
+                modifier.show_on_cage =     True
+              if self.subsurf_cage_visibility == 'OFF':
+                modifier.show_on_cage =     False
+
             if self.subsurf_change_levels == True:
               modifier.levels =           self.subsurf_levels
             if self.subsurf_change_render_levels == True:
@@ -89,7 +155,13 @@ class subsurf_settings(bpy.types.Operator):
             print("No Subsurf modifiers for " + obj.name)
 
       if subsurf_found == True:
-        obj.cycles.use_adaptive_subdivision = self.subsurf_adaptive_subdivision
-        obj.cycles.dicing_rate = self.subsurf_adaptive_dicing_rate
+        if self.subsurf_adaptive_subdivision != 'Unchanged':
+          if self.subsurf_adaptive_subdivision == 'ON':
+            obj.cycles.use_adaptive_subdivision = True
+          if self.subsurf_adaptive_subdivision == 'OFF':
+            obj.cycles.use_adaptive_subdivision = False
+        
+        if self.subsurf_change_adaptive_dicing_rate == True:
+          obj.cycles.dicing_rate = self.subsurf_adaptive_dicing_rate
 
     return {'FINISHED'}
