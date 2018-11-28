@@ -10,10 +10,10 @@ class object_draw_mode(bpy.types.Operator):
     name = 'Mode',
     description = 'Maximum Draw Mode',
     items = [
-      ('BOUNDS', 'BOUNDS',''),
-      ('WIRE', 'WIRE',''),
-      ('SOLID', 'SOLID',''),
-      ('TEXTURED', 'TEXTURED','')
+      ('BOUNDS'   , 'BOUNDS'   ,'', 'PANEL_CLOSE'   , 0),
+      ('WIRE'     , 'WIRE'     ,'', 'WIRE'          , 1),
+      ('SOLID'    , 'SOLID'    ,'', 'SOLID'         , 2),
+      ('TEXTURED' , 'TEXTURED' ,'', 'POTATO'        , 3)
     ]
   )
 

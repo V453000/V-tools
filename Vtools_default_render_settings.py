@@ -19,7 +19,7 @@ class default_render_settings(bpy.types.Operator):
     description = 'Select rendering engine',
     items = [
       ('CYCLES', 'Cycles',''),
-      ('BLENDER_RENDER', 'BLender Render','')
+      ('BLENDER_RENDER', 'Blender Render','')
     ]
   )
 

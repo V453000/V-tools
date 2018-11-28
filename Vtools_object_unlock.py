@@ -10,36 +10,36 @@ class object_unlock(bpy.types.Operator):
     name = 'Targets',
     description = 'Which objects to use - All in blend file, all in the current scene or all in the current selection.',
     items = [
-      ('Scene'   , 'Current Scene' , ''),
-      ('All'     , 'All scenes'    , ''),
-      ('Selected', 'Selected'      , '')
+      ('Selected', 'Selected'      , '', 'RESTRICT_SELECT_OFF'   , 0),
+      ('Scene'   , 'Current Scene' , '', 'SCENE_DATA'            , 1),
+      ('All'     , 'All scenes'    , '', 'BLENDER'               , 2)
     ]
   )
   set_viewport = bpy.props.EnumProperty(
     name = 'Viewport visibility',
     description = 'Choose whether objects should show in viewport.',
     items = [
-      ('No change' , 'No change'    , ''),
-      ('Visible'   , 'Visible'      , ''),
-      ('Hidden'    , 'Hidden'       , '')
+      ('No change' , 'No change'   , '', 'PANEL_CLOSE'               , 1),
+      ('Visible'   , 'Visible'     , '', 'VISIBLE_IPO_ON'            , 1),
+      ('Hidden'    , 'Hidden'      , '', 'VISIBLE_IPO_OFF'           , 2)
     ]
   )
   set_select = bpy.props.EnumProperty(
     name = 'Selecting',
     description = 'Choose whether objects should be selectible.',
     items = [
-      ('No change'   , 'No change'    , ''),
-      ('Allowed'     , 'Allowed'      , ''),
-      ('Disabled'    , 'Disabled'     , '')
+      ('No change'   , 'No change'  , '', 'PANEL_CLOSE'              , 0),
+      ('Allowed'     , 'Allowed'    , '', 'RESTRICT_SELECT_OFF'      , 1),
+      ('Disabled'    , 'Disabled'   , '', 'RESTRICT_SELECT_ON'       , 2)
     ]
   )
   set_render = bpy.props.EnumProperty(
     name = 'Render visibility',
     description = 'Choose whether objects should show in render.',
     items = [
-      ('No change' , 'No change'    , ''),
-      ('Visible'   , 'Visible'      , ''),
-      ('Hidden'    , 'Hidden'       , '')
+      ('No change' , 'No change'    , '', 'PANEL_CLOSE'              , 0),
+      ('Visible'   , 'Visible'      , '', 'RESTRICT_RENDER_OFF'      , 1),
+      ('Hidden'    , 'Hidden'       , '', 'RESTRICT_RENDER_ON'       , 2)
     ]
   )
 
