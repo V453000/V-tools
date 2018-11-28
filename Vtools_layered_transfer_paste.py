@@ -39,21 +39,32 @@ class layered_transfer_paste(bpy.types.Operator):
       # only process things which start with |
       if tested_name[:1] == '|':
         print(tested_name)
+
+        # save if any of the layers were 19
+        belongs_to_19 = False
+
         # as long as the name starts with |, iterate
         while tested_name[:1] == '|':
           # cut out the first character - |
           tested_name = tested_name[1:]
           # get the first characters from the new string (numeric ID)
           layer_ID = tested_name[:2]
+          if layer_ID == 19:
+            belongs_to_19 = True
           print(layer_ID)
           # enable layers based on the numeric ID
           for i in range(0,20):
             if layer_ID == layer_list[i]:
               obj.layers[i] = layer_ID == layer_list[i]
+          
             
           # cut the last 2 characters from the start (numeric ID)
           tested_name = tested_name[2:]
           print(tested_name)
+
+        if belongs_to_19 == False:
+          obj.layers[19] = False
+
         obj.name = tested_name[1:]
 
 
