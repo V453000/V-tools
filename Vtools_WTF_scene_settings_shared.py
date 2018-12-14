@@ -40,6 +40,8 @@ class WTF_scene_settings_shared(bpy.types.Operator):
       scene.cycles.pixel_filter_type = 'BOX'
 
       scene.render.image_settings.color_depth = '16'
+      scene.render.image_settings.compression = 100
+
 
       if scene.cycles.device == 'CPU':
         scene.render.tile_x = 64
