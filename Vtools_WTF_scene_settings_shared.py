@@ -41,7 +41,7 @@ class WTF_scene_settings_shared(bpy.types.Operator):
 
       scene.render.image_settings.color_depth = '16'
       scene.render.image_settings.compression = 100
-
+      scene.render.image_settings.file_format = 'PNG'
 
       if scene.cycles.device == 'CPU':
         scene.render.tile_x = 64
