@@ -102,6 +102,7 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
         track_to_constraint.track_axis = 'TRACK_NEGATIVE_Z'
         track_to_constraint.up_axis    = 'UP_Y'
     
+    '''
     bpy.ops.scene.wtf_generate_material_nrm()
     # duplicate all remaining render layers and add -XYZ-Normalmap instead of -copy
     for scene in bpy.data.scenes:
@@ -122,6 +123,6 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
           if combined_name not in renderlayer_list:
             bpy.ops.scene.duplicate_render_layer(set_appendix = '-Normalmap', set_source_render_layer = render_layer.name, set_source_scene = scene.name, set_target_scene = scene.name)
             scene.render.layers[combined_name].material_override = bpy.data.materials['Normalmap']
-
+    '''
 
     return {'FINISHED'}

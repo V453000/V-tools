@@ -48,8 +48,6 @@ class WTF_render_XYZ(bpy.types.Operator):
       camera_boss_object = camera_obj
       while(camera_boss_object.parent is not None):
         camera_boss_object = camera_boss_object.parent
-
-      
       
       camera_obj.constraints['XYZ_TRACK_TO'].mute = True
       camera_original_matrix = camera_obj.matrix_world.copy()
@@ -70,7 +68,6 @@ class WTF_render_XYZ(bpy.types.Operator):
       
       # read the resolution and set it to double before rendering
       resolution_multiplier = 2
-
       resolution_percentage = bpy.context.scene.render.resolution_percentage
       bpy.context.scene.render.resolution_percentage = resolution_percentage*resolution_multiplier
       bpy.context.scene.render.tile_x = bpy.context.scene.render.resolution_x *resolution_multiplier
