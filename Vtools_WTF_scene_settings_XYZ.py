@@ -36,6 +36,7 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
       scene.render.use_overwrite = False
       scene.render.use_placeholder = True
 
+    # setting for XYZ scale
     if bpy.data.node_groups.get('XYZ-settings') is None:
       settings_group = bpy.data.node_groups.new(name = 'XYZ-settings', type = 'ShaderNodeTree')
     else:
@@ -48,6 +49,16 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
       settings_scale_node.outputs[0].default_value = 128
     else:
       settings_scale_node = settings_group.nodes['XYZ-settings-scale']
+    
+    # setting for material override
+    if settings_group.nodes.get('XYZ-settings-material-override') is None:
+      settings_material_override_node = settings_group.nodes.new('ShaderNodeValue')
+      settings_material_override_node.name =  'XYZ-settings-material-override'
+      settings_material_override_node.label = 'XYZ-settings-material-override'
+      settings_material_override_node.outputs[0].default_value = 1
+      settings_material_override_node.location = (0, -200)
+    else:
+      settings_material_override_node = settings_group.nodes['XYZ-settings-material-override']
 
     settings_scale = settings_scale_node.outputs[0].default_value
 
@@ -57,7 +68,10 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
     # set material override on all RenderLayers
     for scene in bpy.data.scenes:
       for renderlayer in scene.render.layers:
-        renderlayer.material_override = bpy.data.materials['XYZmap']
+        if settings_material_override_node.outputs[0].default_value == 1:
+          renderlayer.material_override = bpy.data.materials['XYZmap']
+        else:
+          renderlayer.material_override = None
         renderlayer.cycles.use_denoising = False
         #'''
         #Disabled because every material is getting the node group.
