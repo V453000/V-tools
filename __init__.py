@@ -87,6 +87,7 @@ if "bpy" in locals():
   from . import Vtools_WTF_scene_settings_XYZ
   from . import Vtools_WTF_scene_settings_NRM
   from . import Vtools_WTF_render_XYZ
+  from . import Vtools_WTF_render_Normal
   from . import Vtools_WTF_set_XYZ_ground
   from . import Vtools_WTF_create_camera_helper
 
@@ -121,6 +122,7 @@ WTF_scene_settings_shared =      Vtools_WTF_scene_settings_shared.WTF_scene_sett
 WTF_scene_settings_XYZ    =      Vtools_WTF_scene_settings_XYZ.WTF_scene_settings_XYZ
 WTF_scene_settings_NRM    =      Vtools_WTF_scene_settings_NRM.WTF_scene_settings_NRM
 WTF_render_XYZ =                 Vtools_WTF_render_XYZ.WTF_render_XYZ
+WTF_render_Normal =              Vtools_WTF_render_Normal.WTF_render_Normal
 WTF_set_XYZ_ground =             Vtools_WTF_set_XYZ_ground.WTF_set_XYZ_ground
 WTF_create_camera_helper =       Vtools_WTF_create_camera_helper.WTF_create_camera_helper
 
@@ -402,6 +404,7 @@ def register():
   bpy.utils.register_class(WTF_scene_settings_XYZ      )
   bpy.utils.register_class(WTF_scene_settings_NRM      )
   bpy.utils.register_class(WTF_render_XYZ              )
+  bpy.utils.register_class(WTF_render_Normal           )
   bpy.utils.register_class(WTF_set_XYZ_ground          )
   bpy.utils.register_class(WTF_create_camera_helper    )
 
@@ -457,6 +460,7 @@ def unregister():
   bpy.utils.unregister_class(WTF_scene_settings_XYZ      )
   bpy.utils.unregister_class(WTF_scene_settings_NRM      )
   bpy.utils.unregister_class(WTF_render_XYZ              )
+  bpy.utils.unregister_class(WTF_render_Normal           )
   bpy.utils.unregister_class(WTF_set_XYZ_ground          )
   bpy.utils.unregister_class(WTF_create_camera_helper    )
 
