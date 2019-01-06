@@ -40,6 +40,10 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       else:
         xyz_group = bpy.data.node_groups['XYZgroup']
 
+      # add input socket for alpha      
+      if xyz_group.inputs.get('Alpha') is None:
+        xyz_group.inputs.new('NodeSocketFloat', 'Alpha')
+
       xyz_material_nodes = xyz_material.node_tree.nodes
       xyz_material_links = xyz_material.node_tree.links
       xyz_group_nodes = xyz_group.nodes
@@ -173,7 +177,27 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
 
       xyz_emission_node = xyz_group_nodes.new('ShaderNodeEmission')
       xyz_emission_node.location = (loc_x, loc_y)
+      loc_y = loc_y + 200
+      
+      # TRANSPARENCY STUFF
+      xyz_group_input_node = xyz_group_nodes.new('NodeGroupInput')
+      xyz_group_input_node.location = (loc_x, loc_y)
       loc_x = loc_x + 200
+      
+      xyz_greater_than_node = xyz_group_nodes.new('ShaderNodeMath')
+      xyz_greater_than_node.operation = 'GREATER_THAN'
+      xyz_greater_than_node.location = (loc_x, loc_y)
+      loc_y = loc_y - 400
+      
+      xyz_transparent_node = xyz_group_nodes.new('ShaderNodeBsdfTransparent')
+      xyz_transparent_node.location = (loc_x, loc_y)
+      loc_x = loc_x + 200
+      loc_y = loc_y + 200
+
+      xyz_mix_transparency_node = xyz_group_nodes.new('ShaderNodeMixShader')
+      xyz_mix_transparency_node.location = (loc_x, loc_y)
+      loc_x = loc_x + 200
+      # END OF TRANSPARENCY STUFF
 
       xyz_group_output_node = xyz_group_nodes.new('NodeGroupOutput')
       xyz_group_output_node.location = (loc_x, loc_y)
@@ -185,7 +209,12 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       # add links
       xyz_group_links.new(xyz_geometry_node.outputs['Position'], xyz_mapping_node.inputs[0])
       xyz_group_links.new(xyz_mapping_node.outputs[0], xyz_emission_node.inputs[0])
-      xyz_group_links.new(xyz_emission_node.outputs[0], xyz_group_output_node.inputs[0])
+      xyz_group_links.new(xyz_emission_node.outputs[0], xyz_mix_transparency_node.inputs[1])
+      xyz_group_links.new(xyz_transparent_node.outputs[0], xyz_mix_transparency_node.inputs[2])
+      xyz_group_links.new(xyz_group_input_node.outputs[0], xyz_greater_than_node.inputs[0])
+      xyz_group_links.new(xyz_greater_than_node.outputs[0], xyz_mix_transparency_node.inputs[0])
+      xyz_group_links.new(xyz_mix_transparency_node.outputs[0], xyz_group_output_node.inputs[0])
+      # add links in xyz_material
       xyz_material_links.new(xyz_group_in_material.outputs[0], xyz_output_node.inputs[0])
 
       xyz_group_output_node.inputs[0].name = 'XYZ Shader'
