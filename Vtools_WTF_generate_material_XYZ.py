@@ -224,25 +224,25 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       xyz_group.outputs[0].name = 'XYZ Shader'
 
     def override_material_diffuse(material, node_group):
+      if material.name is not 'XYZmap' or material.name is not 'Normalmap':
+        print('-'*60,material.name)
+        if material.node_tree is not None:
+          if material.node_tree.nodes.get('Material Output'):
+            override_material_output_node = material.node_tree.nodes['Material Output']
 
-      print('-'*60,material.name)
-      if material.node_tree is not None:
-        if material.node_tree.nodes.get('Material Output'):
-          override_material_output_node = material.node_tree.nodes['Material Output']
+            if material.node_tree.nodes.get(node_group.name) is None:
+              override_wtf_group = material.node_tree.nodes.new('ShaderNodeGroup')
+              override_wtf_group.node_tree = node_group
+              override_wtf_group.name = node_group.name#'WTF_material_group'
+              override_wtf_group.label = node_group.name#'WTF_material_group'
+            else:
+              override_wtf_group = material.node_tree.nodes[node_group.name]
 
-          if material.node_tree.nodes.get(node_group.name) is None:
-            override_wtf_group = material.node_tree.nodes.new('ShaderNodeGroup')
-            override_wtf_group.node_tree = node_group
-            override_wtf_group.name = node_group.name#'WTF_material_group'
-            override_wtf_group.label = node_group.name#'WTF_material_group'
-          else:
-            override_wtf_group = material.node_tree.nodes[node_group.name]
+            override_wtf_group.location = (override_material_output_node.location[0]-300, override_material_output_node.location[1])
 
-          override_wtf_group.location = (override_material_output_node.location[0]-300, override_material_output_node.location[1])
+            override_links = material.node_tree.links
 
-          override_links = material.node_tree.links
-
-          override_links.new(override_wtf_group.outputs[0], override_material_output_node.inputs[0])
+            override_links.new(override_wtf_group.outputs[0], override_material_output_node.inputs[0])
 
 
     # ------------------------------------------------------------------------------------------------------------
@@ -258,6 +258,9 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
 
     #-------------------------------------------------------------------------------------------------------
 
+    #generate NRM
+    bpy.ops.scene.wtf_generate_material_nrm()
+    
     # check if WTF group exists
     if bpy.data.node_groups.get('WTFgroup') is None:
       # create WTF group
@@ -281,7 +284,16 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       XYZ_in_WTF.name = 'XYZgroup'
     else:
       XYZ_in_WTF = wtf_group.nodes['XYZgroup']
+    
+    if wtf_group.nodes.get('Normalgroup') is None:
+      NRM_in_WTF = wtf_group.nodes.new('ShaderNodeGroup')
+      NRM_in_WTF.node_tree = bpy.data.node_groups['Normalgroup']
+      NRM_in_WTF.name = 'Normalgroup'
+      NRM_in_WTF.location = (0,-200)
+    else:
+      XYZ_in_WTF = wtf_group.nodes['XYZgroup']
 
+    wtf_group.links.new(wtf_input_node.outputs[0], NRM_in_WTF.inputs[0])
     wtf_group.links.new(wtf_input_node.outputs[0], XYZ_in_WTF.inputs[0])
     wtf_group.links.new(XYZ_in_WTF.outputs[0], wtf_output_node.inputs[0])
     

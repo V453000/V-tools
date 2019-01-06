@@ -18,19 +18,36 @@ class WTF_generate_material_NRM(bpy.types.Operator):
       else:
         normalmap_material = bpy.data.materials['Normalmap']
 
-      normalmap_tree = normalmap_material.node_tree
-      normalmap_nodes = normalmap_tree.nodes
-      normalmap_links = normalmap_tree.links
+      
+      # check if XYZmap group exists
+      if bpy.data.node_groups.get('Normalgroup') is None:
+        # create XYZmap group
+        normal_group = bpy.data.node_groups.new(type = 'ShaderNodeTree', name = 'Normalgroup')
+      else:
+        normal_group = bpy.data.node_groups['Normalgroup']
+
+      # add input socket for alpha      
+      if normal_group.inputs.get('Alpha') is None:
+        normal_group.inputs.new('NodeSocketFloat', 'Alpha')
+
+
+      normalmap_material_nodes = normalmap_material.node_tree.nodes
+      normalmap_material_links = normalmap_material.node_tree.links
+      normal_group_nodes = normal_group.nodes
+      normal_group_links = normal_group.links
+
       # clean all nodes
-      for node in normalmap_nodes:
-        normalmap_nodes.remove(node)
+      for node in normalmap_material_nodes:
+        normalmap_material_nodes.remove(node)
+      for node in normal_group_nodes:
+        normal_group_nodes.remove(node)
       
       # add nodes
       loc_x = 0
       loc_y = 0
 
       name = 'Geometry_node'
-      normalmap_geometry_node = normalmap_nodes.new('ShaderNodeNewGeometry')
+      normalmap_geometry_node = normal_group_nodes.new('ShaderNodeNewGeometry')
       normalmap_geometry_node.location = (loc_x, loc_y)
       normalmap_geometry_node.name = name
       normalmap_geometry_node.label = normalmap_geometry_node.name
@@ -38,7 +55,7 @@ class WTF_generate_material_NRM(bpy.types.Operator):
 
       cam_z_rot = bpy.context.scene.camera.matrix_world.to_euler()[2] # Z rotation of the current scene's camera
 
-      normalmap_mapping_node = normalmap_nodes.new('ShaderNodeMapping')
+      normalmap_mapping_node = normal_group_nodes.new('ShaderNodeMapping')
       normalmap_mapping_node.vector_type = 'NORMAL'
       normalmap_mapping_node.translation[0] = 0
       normalmap_mapping_node.translation[1] = 0
@@ -55,7 +72,7 @@ class WTF_generate_material_NRM(bpy.types.Operator):
       loc_x = loc_x + 400
       
       name = 'Separate_XYZ_node'
-      normalmap_separate_XYZ_node = normalmap_nodes.new('ShaderNodeSeparateXYZ')
+      normalmap_separate_XYZ_node = normal_group_nodes.new('ShaderNodeSeparateXYZ')
       normalmap_separate_XYZ_node.location = (loc_x, loc_y)
       normalmap_separate_XYZ_node.name = name
       normalmap_separate_XYZ_node.label = normalmap_separate_XYZ_node.name
@@ -63,21 +80,21 @@ class WTF_generate_material_NRM(bpy.types.Operator):
 
       loc_y += 200
       name = 'X_multiply_node'
-      normalmap_X_multiply_node = normalmap_nodes.new('ShaderNodeMath')
+      normalmap_X_multiply_node = normal_group_nodes.new('ShaderNodeMath')
       normalmap_X_multiply_node.location = (loc_x, loc_y)
       normalmap_X_multiply_node.operation = 'MULTIPLY'
       normalmap_X_multiply_node.name = name
       normalmap_X_multiply_node.label = normalmap_X_multiply_node.name
       loc_y -= 200
       name = 'Y_multiply_node'
-      normalmap_Y_multiply_node = normalmap_nodes.new('ShaderNodeMath')
+      normalmap_Y_multiply_node = normal_group_nodes.new('ShaderNodeMath')
       normalmap_Y_multiply_node.location = (loc_x, loc_y)
       normalmap_Y_multiply_node.operation = 'MULTIPLY'
       normalmap_Y_multiply_node.name = name
       normalmap_Y_multiply_node.label = normalmap_Y_multiply_node.name
       loc_y -= 200
       name = 'Z_multiply_node'
-      normalmap_Z_multiply_node = normalmap_nodes.new('ShaderNodeMath')
+      normalmap_Z_multiply_node = normal_group_nodes.new('ShaderNodeMath')
       normalmap_Z_multiply_node.location = (loc_x, loc_y)
       normalmap_Z_multiply_node.operation = 'MULTIPLY'
       normalmap_Z_multiply_node.name = name
@@ -87,21 +104,21 @@ class WTF_generate_material_NRM(bpy.types.Operator):
 
       loc_y += 200
       name = 'X_add_node'
-      normalmap_X_add_node = normalmap_nodes.new('ShaderNodeMath')
+      normalmap_X_add_node = normal_group_nodes.new('ShaderNodeMath')
       normalmap_X_add_node.location = (loc_x, loc_y)
       normalmap_X_add_node.operation = 'ADD'
       normalmap_X_add_node.name = name
       normalmap_X_add_node.label = normalmap_X_add_node.name
       loc_y -= 200
       name = 'Y_add_node'
-      normalmap_Y_add_node = normalmap_nodes.new('ShaderNodeMath')
+      normalmap_Y_add_node = normal_group_nodes.new('ShaderNodeMath')
       normalmap_Y_add_node.location = (loc_x, loc_y)
       normalmap_Y_add_node.operation = 'ADD'
       normalmap_Y_add_node.name = name
       normalmap_Y_add_node.label = normalmap_Y_add_node.name
       loc_y -= 200
       name = 'Z_add_node'
-      normalmap_Z_add_node = normalmap_nodes.new('ShaderNodeMath')
+      normalmap_Z_add_node = normal_group_nodes.new('ShaderNodeMath')
       normalmap_Z_add_node.location = (loc_x, loc_y)
       normalmap_Z_add_node.operation = 'ADD'
       normalmap_Z_add_node.name = name
@@ -110,43 +127,52 @@ class WTF_generate_material_NRM(bpy.types.Operator):
       loc_x += 200
 
       name = 'Combine_XYZ_node'
-      normalmap_combine_XYZ_node = normalmap_nodes.new('ShaderNodeCombineXYZ')
+      normalmap_combine_XYZ_node = normal_group_nodes.new('ShaderNodeCombineXYZ')
       normalmap_combine_XYZ_node.location = (loc_x, loc_y)
       normalmap_combine_XYZ_node.name = name
       normalmap_combine_XYZ_node.label = normalmap_combine_XYZ_node.name
       loc_x += 200
 
       name = 'Emission_node'
-      normalmap_emission_node = normalmap_nodes.new('ShaderNodeEmission')
+      normalmap_emission_node = normal_group_nodes.new('ShaderNodeEmission')
       normalmap_emission_node.location = (loc_x, loc_y)
       normalmap_emission_node.name = name
       normalmap_emission_node.label = normalmap_emission_node.name
       loc_x += 200
 
       name = 'Output_node'
-      normalmap_output_node = normalmap_nodes.new('ShaderNodeOutputMaterial')
+      normalmap_output_node = normal_group_nodes.new('NodeGroupOutput')
       normalmap_output_node.location = (loc_x, loc_y)
       normalmap_output_node.name = name
       normalmap_output_node.label = normalmap_output_node.name
 
       # add links
-      normalmap_links.new(normalmap_geometry_node.outputs['Normal'], normalmap_mapping_node.inputs[0])
-      normalmap_links.new(normalmap_mapping_node.outputs[0], normalmap_separate_XYZ_node.inputs[0])
+      normal_group_links.new(normalmap_geometry_node.outputs['Normal'], normalmap_mapping_node.inputs[0])
+      normal_group_links.new(normalmap_mapping_node.outputs[0], normalmap_separate_XYZ_node.inputs[0])
 
-      normalmap_links.new(normalmap_separate_XYZ_node.outputs[0], normalmap_X_multiply_node.inputs[0])
-      normalmap_links.new(normalmap_separate_XYZ_node.outputs[1], normalmap_Y_multiply_node.inputs[0])
-      normalmap_links.new(normalmap_separate_XYZ_node.outputs[2], normalmap_Z_multiply_node.inputs[0])
+      normal_group_links.new(normalmap_separate_XYZ_node.outputs[0], normalmap_X_multiply_node.inputs[0])
+      normal_group_links.new(normalmap_separate_XYZ_node.outputs[1], normalmap_Y_multiply_node.inputs[0])
+      normal_group_links.new(normalmap_separate_XYZ_node.outputs[2], normalmap_Z_multiply_node.inputs[0])
 
-      normalmap_links.new(normalmap_X_multiply_node.outputs[0], normalmap_X_add_node.inputs[0])
-      normalmap_links.new(normalmap_Y_multiply_node.outputs[0], normalmap_Y_add_node.inputs[0])
-      normalmap_links.new(normalmap_Z_multiply_node.outputs[0], normalmap_Z_add_node.inputs[0])
+      normal_group_links.new(normalmap_X_multiply_node.outputs[0], normalmap_X_add_node.inputs[0])
+      normal_group_links.new(normalmap_Y_multiply_node.outputs[0], normalmap_Y_add_node.inputs[0])
+      normal_group_links.new(normalmap_Z_multiply_node.outputs[0], normalmap_Z_add_node.inputs[0])
 
-      normalmap_links.new(normalmap_X_add_node.outputs[0], normalmap_combine_XYZ_node.inputs[0])
-      normalmap_links.new(normalmap_Y_add_node.outputs[0], normalmap_combine_XYZ_node.inputs[1])
-      normalmap_links.new(normalmap_Z_add_node.outputs[0], normalmap_combine_XYZ_node.inputs[2])
+      normal_group_links.new(normalmap_X_add_node.outputs[0], normalmap_combine_XYZ_node.inputs[0])
+      normal_group_links.new(normalmap_Y_add_node.outputs[0], normalmap_combine_XYZ_node.inputs[1])
+      normal_group_links.new(normalmap_Z_add_node.outputs[0], normalmap_combine_XYZ_node.inputs[2])
 
-      normalmap_links.new(normalmap_combine_XYZ_node.outputs[0], normalmap_emission_node.inputs[0])
-      normalmap_links.new(normalmap_emission_node.outputs[0], normalmap_output_node.inputs[0])
+      normal_group_links.new(normalmap_combine_XYZ_node.outputs[0], normalmap_emission_node.inputs[0])
+      normal_group_links.new(normalmap_emission_node.outputs[0], normalmap_output_node.inputs[0])
+
+      normal_group.outputs[0].name = 'Normal shader'
+
+      # add normal group to material
+      NRM_in_material = normalmap_material_nodes.new('ShaderNodeGroup')
+      NRM_in_material.node_tree = normal_group
+      NRM_material_output = normalmap_material_nodes.new('ShaderNodeOutputMaterial')
+      NRM_material_output.location = (200,0)
+      normalmap_material_links.new(NRM_in_material.outputs[0], NRM_material_output.inputs[0])
 
     # ------------------------------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------------------------------
