@@ -203,8 +203,8 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       # END OF TRANSPARENCY STUFF
 
       xyz_group_output_node = xyz_group_nodes.new('NodeGroupOutput')
+      xyz_group_output_node.name = 'XYZ Output Node'
       xyz_group_output_node.location = (loc_x, loc_y)
-      #xyz_group_output_node.inputs.new(type = 'SHADER', name = 'XYZ') # this doesn't seem to do anything, the linking works without it
 
       xyz_output_node = xyz_material_nodes.new('ShaderNodeOutputMaterial')
       xyz_output_node.location = (loc_x, loc_y)
@@ -272,11 +272,20 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
     if wtf_group.inputs.get('Alpha') is None:
       wtf_group.inputs.new('NodeSocketFloat', 'Alpha')
     
-    wtf_input_node = wtf_group.nodes.new('NodeGroupInput')
-    wtf_input_node.location = (-200, 0)
-    
-    wtf_output_node = wtf_group.nodes.new('NodeGroupOutput')
-    wtf_output_node.location = (200, 0)
+    if wtf_group.nodes.get('WTF_Input_Node') is None:
+      wtf_input_node = wtf_group.nodes.new('NodeGroupInput')
+      wtf_input_node.name = 'WTF_Input_Node'
+      wtf_input_node.location = (-200, 0)
+    else:
+      wtf_input_node = wtf_group.nodes['WTF_Input_Node']   
+
+    if wtf_group.nodes.get('WTF_Output_Node') is None:
+      wtf_output_node = wtf_group.nodes.new('NodeGroupOutput')
+      wtf_output_node.name = 'WTF_Output_Node'
+      wtf_output_node.location = (200, 0)
+    else:
+      wtf_output_node = wtf_group.nodes['WTF_Output_Node']
+
     
     if wtf_group.nodes.get('XYZgroup') is None:
       XYZ_in_WTF = wtf_group.nodes.new('ShaderNodeGroup')
@@ -291,7 +300,7 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       NRM_in_WTF.name = 'Normalgroup'
       NRM_in_WTF.location = (0,-200)
     else:
-      XYZ_in_WTF = wtf_group.nodes['XYZgroup']
+      NRM_in_WTF = wtf_group.nodes['Normalgroup']
 
     wtf_group.links.new(wtf_input_node.outputs[0], NRM_in_WTF.inputs[0])
     wtf_group.links.new(wtf_input_node.outputs[0], XYZ_in_WTF.inputs[0])
