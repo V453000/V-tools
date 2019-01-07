@@ -187,8 +187,8 @@ class WTF_generate_material_NRM(bpy.types.Operator):
       normal_group_links.new(normalmap_combine_XYZ_node.outputs[0], normalmap_emission_node.inputs[0])
 
       normal_group_links.new(normalmap_group_input_node.outputs[0], normalmap_mix_transparency_node.inputs[0])
-      normal_group_links.new(normalmap_emission_node.outputs[0], normalmap_mix_transparency_node.inputs[1])
-      normal_group_links.new(normalmap_transparency_node.outputs[0], normalmap_mix_transparency_node.inputs[2])
+      normal_group_links.new(normalmap_transparency_node.outputs[0], normalmap_mix_transparency_node.inputs[1])
+      normal_group_links.new(normalmap_emission_node.outputs[0], normalmap_mix_transparency_node.inputs[2])
       normal_group_links.new(normalmap_mix_transparency_node.outputs[0], normalmap_output_node.inputs[0])
 
       normal_group.outputs[0].name = 'Normal shader'

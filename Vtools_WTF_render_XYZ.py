@@ -77,10 +77,10 @@ class WTF_render_XYZ(bpy.types.Operator):
       for i in range(0,20):
         bpy.context.scene.layers[i] = True
 
-      
+      '''
       # render normalmap
       bpy.ops.scene.wtf_render_normal()
-      
+      '''
 
       # iterate through frames and render each one individually
       for f in range(frame_start, frame_end+1):
