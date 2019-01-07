@@ -187,9 +187,9 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       xyz_group_input_node.location = (loc_x, loc_y)
       loc_x = loc_x + 200
       
-      xyz_greater_than_node = xyz_group_nodes.new('ShaderNodeMath')
-      xyz_greater_than_node.operation = 'GREATER_THAN'
-      xyz_greater_than_node.location = (loc_x, loc_y)
+      xyz_less_than_node = xyz_group_nodes.new('ShaderNodeMath')
+      xyz_less_than_node.operation = 'LESS_THAN'
+      xyz_less_than_node.location = (loc_x, loc_y)
       loc_y = loc_y - 400
       
       xyz_transparent_node = xyz_group_nodes.new('ShaderNodeBsdfTransparent')
@@ -214,12 +214,13 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       xyz_group_links.new(xyz_mapping_node.outputs[0], xyz_emission_node.inputs[0])
       xyz_group_links.new(xyz_emission_node.outputs[0], xyz_mix_transparency_node.inputs[1])
       xyz_group_links.new(xyz_transparent_node.outputs[0], xyz_mix_transparency_node.inputs[2])
-      xyz_group_links.new(xyz_group_input_node.outputs[0], xyz_greater_than_node.inputs[0])
-      xyz_group_links.new(xyz_greater_than_node.outputs[0], xyz_mix_transparency_node.inputs[0])
+      xyz_group_links.new(xyz_group_input_node.outputs[0], xyz_less_than_node.inputs[0])
+      xyz_group_links.new(xyz_less_than_node.outputs[0], xyz_mix_transparency_node.inputs[0])
       xyz_group_links.new(xyz_mix_transparency_node.outputs[0], xyz_group_output_node.inputs[0])
       # add links in xyz_material
       xyz_material_links.new(xyz_group_in_material.outputs[0], xyz_output_node.inputs[0])
 
+      #xyz_group_input_node.outputs[0].default_value = 1
       xyz_group_output_node.inputs[0].name = 'XYZ Shader'
       xyz_group.outputs[0].name = 'XYZ Shader'
 
@@ -243,6 +244,7 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
             override_links = material.node_tree.links
 
             override_links.new(override_wtf_group.outputs[0], override_material_output_node.inputs[0])
+            override_wtf_group.inputs['Alpha'].default_value = 1
 
 
     # ------------------------------------------------------------------------------------------------------------
@@ -312,9 +314,11 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
 
     #----------------------------------------------------------------------------------------------------
 
-
+    wtf_group.inputs[0].default_value = 1
     # add the XYZ group to every other material's diffuse channel
     for material in bpy.data.materials:
       override_material_diffuse(material, bpy.data.node_groups['WTFgroup'])
+
+    
 
     return {'FINISHED'}

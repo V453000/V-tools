@@ -54,6 +54,7 @@ if "bpy" in locals():
     importlib.reload(Vtools_WTF_scene_settings_XYZ)
     importlib.reload(Vtools_WTF_scene_settings_NRM)
     importlib.reload(Vtools_WTF_render_XYZ)
+    importlib.reload(Vtools_WTF_render_Normal)
     importlib.reload(Vtools_WTF_set_XYZ_ground)
     importlib.reload(Vtools_WTF_create_camera_helper)
 

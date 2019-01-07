@@ -79,7 +79,7 @@ class WTF_render_XYZ(bpy.types.Operator):
 
       
       # render normalmap
-      bpy.ops.scene.WTF_render_Normal()
+      bpy.ops.scene.wtf_render_normal()
       
 
       # iterate through frames and render each one individually
