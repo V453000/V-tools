@@ -45,6 +45,7 @@ if "bpy" in locals():
     importlib.reload(Vtools_link_material_to)
     importlib.reload(Vtools_duplicate_render_layer)
     importlib.reload(Vtools_object_unlock)
+    importlib.reload(Vtools_replace_with_group)
 
     importlib.reload(Vtools_material_replace)
 
@@ -79,6 +80,7 @@ if "bpy" in locals():
   from . import Vtools_link_material_to
   from . import Vtools_duplicate_render_layer
   from . import Vtools_object_unlock
+  from . import Vtools_replace_with_group
 
   from . import Vtools_material_replace
 
@@ -113,6 +115,7 @@ layered_transfer_paste =  Vtools_layered_transfer_paste.layered_transfer_paste
 link_material_to =        Vtools_link_material_to.link_material_to
 duplicate_render_layer =  Vtools_duplicate_render_layer.duplicate_render_layer
 object_unlock =           Vtools_object_unlock.object_unlock
+replace_with_group =      Vtools_replace_with_group.replace_with_group
 
 material_replace =        Vtools_material_replace.material_replace
 material_replace_panel =  Vtools_material_replace.material_replace_panel
@@ -178,6 +181,7 @@ class tool_panel_object(bpy.types.Panel):
     layout.operator('object.subsurf_settings'       , text = 'Subsurf Settings'        , icon = 'MOD_SUBSURF'        )
     layout.operator('object.clean_material_slots'   , text = 'Clean Material Slots'    , icon = 'MATERIAL'           )
     layout.operator('object.link_to_all_scenes'     , text = 'Link to All Scenes'      , icon = 'LINK_AREA'          )
+    layout.operator('object.replace_with_group'     , text = 'Replace with group'      , icon = 'GROUP'              )
     layout.operator('object.delete_from_all_scenes' , text = 'Delete From All Scenes'  , icon = 'X'                  )
     layout.operator('object.link_mesh_data'         , text = 'Link Identical Mesh Data', icon = 'MOD_TRIANGULATE'    )
     layout.operator('object.link_material_to'       , text = 'Link Material to...'     , icon = 'LINKED'             )
@@ -398,6 +402,7 @@ def register():
   bpy.utils.register_class(link_material_to)
   bpy.utils.register_class(duplicate_render_layer)
   bpy.utils.register_class(object_unlock)
+  bpy.utils.register_class(replace_with_group)
 
   bpy.utils.register_class(WTF_generate_material_XYZ   )
   bpy.utils.register_class(WTF_generate_material_NRM   )
@@ -454,6 +459,7 @@ def unregister():
   bpy.utils.unregister_class(link_material_to)
   bpy.utils.unregister_class(duplicate_render_layer)
   bpy.utils.unregister_class(object_unlock)
+  bpy.utils.unregister_class(replace_with_group)
 
   bpy.utils.unregister_class(WTF_generate_material_XYZ   )
   bpy.utils.unregister_class(WTF_generate_material_NRM   )
