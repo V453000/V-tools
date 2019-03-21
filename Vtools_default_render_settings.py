@@ -69,7 +69,7 @@ class default_render_settings(bpy.types.Operator):
 
   set_image_compression = bpy.props.IntProperty(
     name = 'Image Compression',
-    default = 0,
+    default = 100,
     min = 0,
     max = 100
   )
