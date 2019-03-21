@@ -67,7 +67,24 @@ class generate_render_nodes(bpy.types.Operator):
     default = 'height'
   )
 
-
+  normal_identifier_use = bpy.props.BoolProperty(
+    name = 'Use Z-Normal',
+    description = 'Save Z-Normal pass from specified RenderLayers to individual folder.',
+    default = True
+  )
+  normal_identifier_position = bpy.props.EnumProperty(
+    name = 'Z-Normal Identifier position',
+    description = 'Select where in the RenderLayer name is the Z-Normal identifier.',
+    items = [
+      ('back', 'back',''),
+      ('front', 'front','')
+    ]
+  )
+  normal_identifier = bpy.props.StringProperty(
+    name = 'Z-Normal Identifier',
+    description = 'Suffix or appendix in the name of RenderLayer for rendering Z-Normal.',
+    default = 'Z-normal'
+  )
 
   remove_existing_nodes = bpy.props.BoolProperty(
     name = 'Remove Existing Nodes',
@@ -78,10 +95,15 @@ class generate_render_nodes(bpy.types.Operator):
     name = 'Regenerate Shadow Shitter',
     description = 'Delete the nodes in current Shadow Shitter and create new ones.',
     default = False
-  )
-  generate_postprocessing = bpy.props.BoolProperty(
-    name = 'Generate Postprocessing',
-    description = 'Automatically create a new POSTPROCESS scene which automatically imports the render outputs.',
+  )  
+  regenerate_height_material = bpy.props.BoolProperty(
+    name = 'Regenerate HEIGHT material',
+    description = 'Delete the nodes in current HEIGHT material and create new ones.',
+    default = False
+  )  
+  regenerate_normal_material = bpy.props.BoolProperty(
+    name = 'Regenerate Z-NORMAL',
+    description = 'Delete the nodes in current Z-NORMAL material and create new ones.',
     default = False
   )  
 
@@ -93,9 +115,11 @@ class generate_render_nodes(bpy.types.Operator):
     render_layers_from_scene = bpy.context.scene.name   
     render_nodes_to_scene = bpy.context.scene.name
 
+    output_folder = "//OUTPUT\\"
     appendix_AO =     self.AO_identifier #'main'
     appendix_shadow = self.shadow_identifier #'shadow' 
     appendix_height = self.height_identifier #'height' 
+    appendix_normal = self.normal_identifier #'Z-normal' 
 
     # ------------------------------------------------------------------------
     # ------------------------------------------------------------------------
@@ -121,7 +145,10 @@ class generate_render_nodes(bpy.types.Operator):
 
 
 
-
+    if bpy.data.materials.get('HEIGHT') is None:
+      height_material_existed = False
+    else:
+      height_material_existed = True
     # check if HEIGHT material exists, if not, create it
     if bpy.data.materials.get('HEIGHT') is None:
       # create new HEIGHT material
@@ -129,6 +156,7 @@ class generate_render_nodes(bpy.types.Operator):
       height_mtl = bpy.data.materials.new('HEIGHT')
       height_mtl.use_nodes = True
       height_nodes = height_mtl.node_tree.nodes
+    if self.regenerate_height_material == True or height_material_existed == False:
       # remove all nodes first
       for node in height_nodes:
         height_nodes.remove(node)
@@ -164,12 +192,46 @@ class generate_render_nodes(bpy.types.Operator):
       height_mtl.node_tree.links.new(mapping_node.outputs[0], separateXYZ_node.inputs[0])
       height_mtl.node_tree.links.new(separateXYZ_node.outputs[2], emission_node.inputs[0])
       height_mtl.node_tree.links.new(emission_node.outputs[0], material_output.inputs[0])
+    
+    if bpy.data.materials.get('Z-NORMAL') is None:
+      normal_material_existed = False
+    else:
+      normal_material_existed = True
+    # check if Z-NORMAL material exists, if not, create it
+    if bpy.data.materials.get('Z-NORMAL') is None:
+      normal_mtl = bpy.data.materials.new('Z-NORMAL')
+      normal_mtl.use_nodes = True
+      normal_nodes = normal_mtl.node_tree.nodes
+    # generate nodes for Z-NORMAL material
+    if self.regenerate_normal_material == True or normal_material_existed == False:
+      # remove all nodes first
+      for node in normal_nodes:
+        normal_nodes.remove(node)
+      # create new nodes
+      geometry_node = normal_nodes.new(type = 'ShaderNodeNewGeometry')
+      geometry_node.name = 'Z-NORMAL-Geometry'
+      geometry_node.label = geometry_node.name
+      geometry_node.location = (-400, 0)
 
+      separateXYZ_node = normal_nodes.new(type = 'ShaderNodeSeparateXYZ')
+      separateXYZ_node.name = 'Z-NORMAL-SeparateXYZ'
+      separateXYZ_node.label = separateXYZ_node.name
+      separateXYZ_node.location = (-200, 0)
 
+      emission_node = normal_nodes.new(type = 'ShaderNodeEmission')
+      emission_node.name = 'Z-NORMAL-Emission'
+      emission_node.label = emission_node.name
+      emission_node.location = (0, 0)
 
+      material_output = normal_nodes.new(type = 'ShaderNodeOutputMaterial')
+      material_output.name = 'Z-NORMAL-MaterialOutput'
+      material_output.label = material_output.name
+      material_output.location = (200, 0)
 
-
-
+      normal_mtl.node_tree.links.new(geometry_node.outputs[1], separateXYZ_node.inputs[0])
+      normal_mtl.node_tree.links.new(separateXYZ_node.outputs[2], emission_node.inputs[0])
+      normal_mtl.node_tree.links.new(emission_node.outputs[0], material_output.inputs[0])
+    
 
 
 
@@ -182,6 +244,7 @@ class generate_render_nodes(bpy.types.Operator):
     appendix_AO_char_count = len(appendix_AO)
     appendix_shadow_char_count = len(appendix_shadow)
     appendix_height_char_count = len(appendix_height)
+    appendix_normal_char_count = len(appendix_normal)
 
     for render_layer in bpy.context.scene.render.layers:
       render_layer_name = render_layer.name
@@ -200,6 +263,11 @@ class generate_render_nodes(bpy.types.Operator):
         render_layer_appendix_height = render_layer_name[-appendix_height_char_count:]
       if self.height_identifier_position == 'front':
         render_layer_appendix_height = render_layer_name[:appendix_height_char_count]
+      
+      if self.normal_identifier_position == 'back':
+        render_layer_appendix_normal = render_layer_name[-appendix_normal_char_count:]
+      if self.normal_identifier_position == 'front':
+        render_layer_appendix_normal = render_layer_name[:appendix_normal_char_count]
 
 
       if render_layer_appendix_AO == appendix_AO:
@@ -219,6 +287,12 @@ class generate_render_nodes(bpy.types.Operator):
         if render_layer.material_override != bpy.data.materials['HEIGHT']:
           print(str(render_layer_name) + ' has appendix "' + appendix_height + '" but does not have HEIGHT material override activated. Activating...')
           render_layer.material_override = bpy.data.materials['HEIGHT']
+      
+      if render_layer_appendix_normal == appendix_normal:
+        print('normal appendix detected')
+        if render_layer.material_override != bpy.data.materials['Z-NORMAL']:
+          print(str(render_layer_name) + ' has appendix "' + appendix_normal + '" but does not have Z-NORMAL material override activated. Activating...')
+          render_layer.material_override = bpy.data.materials['Z-NORMAL']
 
 
     # destroy shadow shitter if desired by settings
@@ -344,7 +418,7 @@ class generate_render_nodes(bpy.types.Operator):
       output_node.name = 'file-output-' + render_layer_name
       output_node.label = 'file-output-' + render_layer_name
 
-      output_node.base_path = "//OUTPUT\\" + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name
+      output_node.base_path = output_folder + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name
 
       # create extra output node for AO
       if render_layer_is_AO == True and self.AO_identifier_use == True:
@@ -356,16 +430,14 @@ class generate_render_nodes(bpy.types.Operator):
         output_node_AO.file_slots.remove(output_node_AO.inputs[0])
         output_node_AO.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_')
 
-        output_node_AO.base_path = "//OUTPUT\\" + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name + '-AO'
+        output_node_AO.base_path = output_folder + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name + '-AO'
 
       # put x pack to normal for next row, and add y for next row
       x_count -= 1
       y_count += 1
-
       # remove output node default input socket
       output_node.file_slots.remove(output_node.inputs[0])
-      
-      # add output node input socket
+            # add output node input socket
       output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_')
 
       # exception to change to shadow pass
@@ -409,16 +481,6 @@ class generate_render_nodes(bpy.types.Operator):
       bpy.context.screen.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
 
       print(render_layer_name)
-
-    # ----------------------------------------------------------------------------------------------------- #
-    #                                                                                                       #
-    #                           G E N E R A T E   P O S T P R O C E S S   N O D E S                         #
-    #                                                                                                       #
-    # ----------------------------------------------------------------------------------------------------- #
-    if self.generate_postprocessing == True:
-      print('Hello dear user.')
-
-
 
     return {'FINISHED'}
 
