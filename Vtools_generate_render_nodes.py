@@ -362,15 +362,18 @@ class generate_render_nodes(bpy.types.Operator):
       input_node.label = input_node.name
       input_node.location = (-200, 0)
 
+      preview_shitter.outputs.new('NodeSocketFloat', 'Preview')
+      '''
       preview_shitter.outputs.new('NodeSocketFloat', 'Full size')
       preview_shitter.outputs.new('NodeSocketFloat', '50% size')
       preview_shitter.outputs.new('NodeSocketFloat', '25% size')
+      '''
 
       output_node = preview_shitter.nodes.new('NodeGroupOutput')
       output_node.name = 'PreviewShitter-Output'
       output_node.label = output_node.name
       output_node.location = (200,0)
-
+      '''
       transform_node_1 = preview_shitter.nodes.new('CompositorNodeTransform')
       transform_node_1.filter_type = 'BILINEAR'
       transform_node_1.inputs[4].default_value = 0.5
@@ -391,6 +394,7 @@ class generate_render_nodes(bpy.types.Operator):
       preview_shitter.links.new(input_node.outputs[0], transform_node_2.inputs[0])
       preview_shitter.links.new(transform_node_1.outputs[0], output_node.inputs[1])
       preview_shitter.links.new(transform_node_2.outputs[0], output_node.inputs[2])
+      '''
 
     # switch scene to destination and make sure nodes are allowed
     bpy.context.screen.scene = bpy.data.scenes[render_nodes_to_scene]
