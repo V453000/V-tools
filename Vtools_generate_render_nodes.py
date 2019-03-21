@@ -368,6 +368,7 @@ class generate_render_nodes(bpy.types.Operator):
       
       render_layer_is_AO = False
       render_layer_is_shadow = False
+      render_layer_is_normal = False
 
 
       # shadow appendix or suffix
@@ -376,8 +377,6 @@ class generate_render_nodes(bpy.types.Operator):
         appendix_or_suffix_shadow = 1
       if self.shadow_identifier_position == 'back':
         appendix_or_suffix_shadow = -1
-
-
 
       # filter AO identifier
       appendix_AO_char_count = len(appendix_AO)
@@ -398,6 +397,16 @@ class generate_render_nodes(bpy.types.Operator):
 
       if node_appendix_shadow == appendix_shadow:
         render_layer_is_shadow = True
+
+      # filter normal identifier
+      appendix_normal_char_count = len(appendix_normal)
+      if self.normal_identifier_position == 'back':
+        node_appendix_normal = render_layer_name[-appendix_normal_char_count:]
+      if self.normal_identifier_position == 'front':
+        node_appendix_normal = render_layer_name[:appendix_normal_char_count]
+
+      if node_appendix_normal == appendix_normal:
+        render_layer_is_normal = True
 
 
 
