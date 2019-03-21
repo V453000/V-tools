@@ -96,6 +96,11 @@ class generate_render_nodes(bpy.types.Operator):
     description = 'Delete the nodes in current Shadow Shitter and create new ones.',
     default = False
   )  
+  regenerate_preview_shitter = bpy.props.BoolProperty(
+    name = 'Regenerate Preview Shitter',
+    description = 'Delete the nodes in current preview Shitter and create new ones.',
+    default = False
+  )
   regenerate_height_material = bpy.props.BoolProperty(
     name = 'Regenerate HEIGHT material',
     description = 'Delete the nodes in current HEIGHT material and create new ones.',
@@ -342,11 +347,50 @@ class generate_render_nodes(bpy.types.Operator):
 
 
 
+    # destroy preview shitter if desired by settings
+    if self.regenerate_preview_shitter == True:
+      if bpy.data.node_groups.get('PreviewShitter') is not None:
+        bpy.data.node_groups.remove(bpy.data.node_groups['PreviewShitter'])
+    # check if preview shitter exists, if not, create it
+    nodes = bpy.context.scene.node_tree.nodes
+    if bpy.data.node_groups.get('PreviewShitter') is None:
+      preview_shitter = bpy.data.node_groups.new(type = 'CompositorNodeTree', name = 'PreviewShitter')
 
+      preview_shitter.inputs.new('NodeSocketFloat', 'Image')
+      input_node = preview_shitter.nodes.new('NodeGroupInput')
+      input_node.name = 'PreviewShitter-Input'
+      input_node.label = input_node.name
+      input_node.location = (-200, 0)
 
+      preview_shitter.outputs.new('NodeSocketFloat', 'Full size')
+      preview_shitter.outputs.new('NodeSocketFloat', '50% size')
+      preview_shitter.outputs.new('NodeSocketFloat', '25% size')
 
+      output_node = preview_shitter.nodes.new('NodeGroupOutput')
+      output_node.name = 'PreviewShitter-Output'
+      output_node.label = output_node.name
+      output_node.location = (200,0)
 
+      transform_node_1 = preview_shitter.nodes.new('CompositorNodeTransform')
+      transform_node_1.filter_type = 'BILINEAR'
+      transform_node_1.inputs[4].default_value = 0.5
+      transform_node_1.name = 'PreviewShitter-Transform-1'
+      transform_node_1.label = transform_node_1.name
+      transform_node_1.location = (0, -50)
+      
+      transform_node_2 = preview_shitter.nodes.new('CompositorNodeTransform')
+      transform_node_2.filter_type = 'BILINEAR'
+      transform_node_2.inputs[4].default_value = 0.25
+      transform_node_2.name = 'PreviewShitter-Transform-2'
+      transform_node_2.label = transform_node_1.name
+      transform_node_2.location = (0, -250)
 
+      #link the nodes
+      preview_shitter.links.new(input_node.outputs[0], output_node.inputs[0])
+      preview_shitter.links.new(input_node.outputs[0], transform_node_1.inputs[0])
+      preview_shitter.links.new(input_node.outputs[0], transform_node_2.inputs[0])
+      preview_shitter.links.new(transform_node_1.outputs[0], output_node.inputs[1])
+      preview_shitter.links.new(transform_node_2.outputs[0], output_node.inputs[2])
 
     # switch scene to destination and make sure nodes are allowed
     bpy.context.screen.scene = bpy.data.scenes[render_nodes_to_scene]
