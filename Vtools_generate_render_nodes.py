@@ -118,6 +118,10 @@ class generate_render_nodes(bpy.types.Operator):
   )  
 
   def execute(self, context):
+    print('----------------------------------------------')
+    print('   G E N E R A T E   R E N D E R    N O D E S ')
+    print('----------------------------------------------')
+
     # ------------------------------------------------------------------------
     # VARIABLES
     # ------------------------------------------------------------------------
@@ -143,10 +147,13 @@ class generate_render_nodes(bpy.types.Operator):
     bpy.context.screen.scene = bpy.data.scenes[render_layers_from_scene]
     # go through render layers and add them to a list
     render_layer_list = []
-    print('Reading render layers:')
+    
     for render_layer in bpy.context.scene.render.layers:
-      print(render_layer.name)
       render_layer_list.append(render_layer.name)
+
+    print('Detected RenderLayers:')
+    for render_layer_name in render_layer_list:
+      print('  ',render_layer_name)
 
 
 
@@ -281,27 +288,19 @@ class generate_render_nodes(bpy.types.Operator):
 
 
       if render_layer_appendix_AO == appendix_AO:
-        print('AO appendix detected')
         if render_layer.use_pass_ambient_occlusion == False:
-          print(str(render_layer_name) + ' has appendix "' + appendix_AO + '" but does not have AO pass activated. Activating...')
           render_layer.use_pass_ambient_occlusion = True
       
       if render_layer_appendix_shadow == appendix_shadow:
-        print('shadow appendix detected')
         if render_layer.use_pass_shadow == False:
-          print(str(render_layer_name) + ' has appendix "' + appendix_shadow + '" but does not have shadow pass activated. Activating...')
           render_layer.use_pass_shadow = True
       
       if render_layer_appendix_height == appendix_height:
-        print('height appendix detected')
         if render_layer.material_override != bpy.data.materials['HEIGHT']:
-          print(str(render_layer_name) + ' has appendix "' + appendix_height + '" but does not have HEIGHT material override activated. Activating...')
           render_layer.material_override = bpy.data.materials['HEIGHT']
       
       if render_layer_appendix_normal == appendix_normal:
-        print('normal appendix detected')
         if render_layer.material_override != bpy.data.materials['Z-NORMAL']:
-          print(str(render_layer_name) + ' has appendix "' + appendix_normal + '" but does not have Z-NORMAL material override activated. Activating...')
           render_layer.material_override = bpy.data.materials['Z-NORMAL']
 
 
@@ -348,7 +347,6 @@ class generate_render_nodes(bpy.types.Operator):
       shadow_shitter.links.new(alpha_over_node.outputs[0], invert_node.inputs[1])
       shadow_shitter.links.new(invert_node.outputs[0], set_alpha_node.inputs[1])
       shadow_shitter.links.new(set_alpha_node.outputs[0], output_node.inputs[0])
-      print('ShadowShitter successfully created!')
 
 
 
@@ -366,6 +364,7 @@ class generate_render_nodes(bpy.types.Operator):
     node_width = 270
 
     if bpy.data.node_groups.get('PreviewShitter') is None:
+      print('PreviewShitter does not exist, creating...')
       preview_shitter = bpy.data.node_groups.new(type = 'CompositorNodeTree', name = 'PreviewShitter')
 
       preview_shitter.inputs.new('NodeSocketFloat', 'main')
@@ -668,31 +667,24 @@ class generate_render_nodes(bpy.types.Operator):
     bpy.context.screen.scene = bpy.data.scenes[render_nodes_to_scene]
     bpy.context.scene.use_nodes = True
 
-    # clear all current composite nodes (mainly for debug)
+    # clear all current composite nodes
     if self.remove_existing_nodes == True:
       for node in bpy.context.scene.node_tree.nodes:
-        print('Removing ' + node.name)
         bpy.context.scene.node_tree.nodes.remove(node)
 
     nodes = bpy.context.scene.node_tree.nodes
     x_count = 0
     y_count = 0
-    x_multiplier = 200
-    y_multiplier = -400
+    x_multiplier = 300
+    y_multiplier = -500
 
     for render_layer_name in render_layer_list:
       
       render_layer_is_AO = False
       render_layer_is_shadow = False
       render_layer_is_normal = False
-
-
-      # shadow appendix or suffix
-      appendix_or_suffix_shadow = -1 # -1 for appendix, 1 for suffix
-      if self.shadow_identifier_position == 'front':
-        appendix_or_suffix_shadow = 1
-      if self.shadow_identifier_position == 'back':
-        appendix_or_suffix_shadow = -1
+      render_layer_is_height = False
+      render_layer_is_main = False
 
       # filter AO identifier
       appendix_AO_char_count = len(appendix_AO)
@@ -724,6 +716,15 @@ class generate_render_nodes(bpy.types.Operator):
       if node_appendix_normal == appendix_normal:
         render_layer_is_normal = True
 
+      # filter height identifier
+      appendix_height_char_count = len(appendix_height)
+      if self.height_identifier_position == 'back':
+        node_appendix_height = render_layer_name[-appendix_height_char_count:]
+      if self.height_identifier_position == 'front':
+        node_appendix_height = render_layer_name[:appendix_height_char_count]
+
+      if node_appendix_height == appendix_height:
+        render_layer_is_height = True
 
 
       # create input node
@@ -733,15 +734,68 @@ class generate_render_nodes(bpy.types.Operator):
       input_node.label = 'render-layer-' + render_layer_name
       input_node.scene = bpy.data.scenes[render_layers_from_scene]
       input_node.layer = render_layer_name
+      input_node.width = x_multiplier-30
       
       # add x for next node
-      x_count += 1
+      x_count += 2
+
+
+
+
+      # read if render layer is shadow/AO/height/normal/...
+      print('RenderLayer name:',render_layer_name)
+      # remove the shadow/AO/height/normal/... identifier and  get a base_name (add scene name)
+      preview_group_name = render_layer_name
+      if render_layer_is_shadow == True:
+        if self.shadow_identifier_position == 'back':
+          preview_group_name = bpy.context.scene.name + '_' + render_layer_name[:-appendix_shadow_char_count]
+        elif self.shadow_identifier_position == 'front':
+          preview_group_name = bpy.context.scene.name + '_' + render_layer_name[appendix_shadow_char_count:]
+        print('...layer identified as shadow')
+
+      elif render_layer_is_AO == True:
+        if self.AO_identifier_position == 'back':
+          preview_group_name = bpy.context.scene.name + '_' + render_layer_name[:-appendix_AO_char_count]
+        elif self.AO_identifier_position == 'front':
+          preview_group_name = bpy.context.scene.name + '_' + render_layer_name[appendix_AO_char_count:]
+        print('...layer identified as AO')
+      elif render_layer_is_height == True:
+        if self.height_identifier_position == 'back':
+          preview_group_name = bpy.context.scene.name + '_' + render_layer_name[:-appendix_height_char_count]
+        elif self.height_identifier_position == 'front':
+          preview_group_name = bpy.context.scene.name + '_' + render_layer_name[appendix_height_char_count:]
+        print('...layer identified as height')
+      elif render_layer_is_normal == True:
+        if self.normal_identifier_position == 'back':
+          preview_group_name = bpy.context.scene.name + '_' + render_layer_name[:-appendix_normal_char_count]
+        elif self.normal_identifier_position == 'front':
+          preview_group_name = bpy.context.scene.name + '_' + render_layer_name[appendix_normal_char_count:]
+        print('...layer identified as normal')
+
+      # create a Preview shitter group for base_name if it does not yet exist
+      if nodes.get(preview_group_name) is None:
+        print('Adding', preview_group_name)
+        preview_shitter_node = nodes.new('CompositorNodeGroup')
+        preview_shitter_node.node_tree = bpy.data.node_groups['PreviewShitter']
+        preview_shitter_node.name = preview_group_name
+        preview_shitter_node.label = preview_shitter_node.name
+        preview_shitter_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+        preview_shitter_node.width = x_multiplier-30
+
+      # connect renderlayer output to preview shitter input
+
+
+
+
+      # add x for next node
+      x_count += -1
 
       # create output node
       output_node = nodes.new('CompositorNodeOutputFile')
       output_node.location = (x_count*x_multiplier, y_count*y_multiplier)
       output_node.name = 'file-output-' + render_layer_name
       output_node.label = 'file-output-' + render_layer_name
+      output_node.width = x_multiplier-30
 
       output_node.base_path = output_folder + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name
 
@@ -751,6 +805,7 @@ class generate_render_nodes(bpy.types.Operator):
         output_node_AO.location = (x_count*x_multiplier, y_count*y_multiplier - 140)
         output_node_AO.name = 'file-output-' + render_layer_name + '-AO'
         output_node_AO.label = 'file-output-' + render_layer_name + '-AO'
+        output_node_AO.width = x_multiplier-30
 
         output_node_AO.file_slots.remove(output_node_AO.inputs[0])
         output_node_AO.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_')
@@ -762,12 +817,22 @@ class generate_render_nodes(bpy.types.Operator):
       y_count += 1
       # remove output node default input socket
       output_node.file_slots.remove(output_node.inputs[0])
-            # add output node input socket
+      # add output node input socket
       output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_')
+
+      ''' 
+      
+      -------------------------------------------------
+      link output to input or previewer
+      -------------------------------------------------
+
+      V--- to input is below ---V
+
+      '''
+
 
       # exception to change to shadow pass
       if render_layer_is_shadow == True and self.shadow_identifier_use == True:
-        print(node_appendix_shadow)
         shadow_shitter = nodes.new('CompositorNodeGroup')
         shadow_shitter.node_tree = bpy.data.node_groups['ShadowShitter']
         #bpy.context.scene.node_tree.links.new(input_node.outputs[3], output_node.inputs[0])
@@ -786,7 +851,6 @@ class generate_render_nodes(bpy.types.Operator):
 
       # exception to add AO pass
       if render_layer_is_AO == True and self.AO_identifier_use == True:
-        print(node_appendix_AO)
         bpy.context.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
         
         # connect to output_node_AO
@@ -796,16 +860,11 @@ class generate_render_nodes(bpy.types.Operator):
         continue
 
 
-
-
-
-
-
-      
       # link the nodes
       bpy.context.screen.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
 
-      print(render_layer_name)
+      print('-> Finished processing', render_layer_name)
+      print('----------')
 
     return {'FINISHED'}
 
