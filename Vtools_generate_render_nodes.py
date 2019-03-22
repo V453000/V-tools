@@ -8,6 +8,12 @@ class generate_render_nodes(bpy.types.Operator):
 
 
 
+  previewer_use = bpy.props.BoolProperty(
+    name = 'Use PreviewShitter',
+    description = 'Choose whether PreviewShitter attempts to combine render passes into a render preview.',
+    default = True
+  )
+
   AO_identifier_use = bpy.props.BoolProperty(
     name = 'Use AO',
     description = 'Save AO pass from specified RenderLayers to individual folder.',
@@ -673,13 +679,12 @@ class generate_render_nodes(bpy.types.Operator):
         bpy.context.scene.node_tree.nodes.remove(node)
 
     nodes = bpy.context.scene.node_tree.nodes
-    x_count = 0
-    y_count = 0
     x_multiplier = 300
     y_multiplier = -500
-
+    y_count = 0
     for render_layer_name in render_layer_list:
-      
+      x_count = 0
+
       render_layer_is_AO = False
       render_layer_is_shadow = False
       render_layer_is_normal = False
@@ -737,7 +742,7 @@ class generate_render_nodes(bpy.types.Operator):
       input_node.width = x_multiplier-30
       
       # add x for next node
-      x_count += 2
+      x_count += 4
 
 
 
@@ -773,7 +778,7 @@ class generate_render_nodes(bpy.types.Operator):
         print('...layer identified as normal')
 
       # create a Preview shitter group for base_name if it does not yet exist
-      if nodes.get(preview_group_name) is None:
+      if nodes.get(preview_group_name) is None and self.previewer_use == True:
         print('Adding', preview_group_name)
         preview_shitter_node = nodes.new('CompositorNodeGroup')
         preview_shitter_node.node_tree = bpy.data.node_groups['PreviewShitter']
@@ -782,13 +787,31 @@ class generate_render_nodes(bpy.types.Operator):
         preview_shitter_node.location = (x_count*x_multiplier, y_count*y_multiplier)
         preview_shitter_node.width = x_multiplier-30
 
+        x_count += 2
+        preview_shitter_output_node = nodes.new('CompositorNodeOutputFile')
+        preview_shitter_output_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+        preview_shitter_output_node.name = 'file-output-' + render_layer_name
+        preview_shitter_output_node.label = 'file-output-' + render_layer_name
+        preview_shitter_output_node.width = x_multiplier-30
+
+        preview_shitter_output_node.base_path = output_folder[:-1] + '-PREVIEW'
+        # remove output node default input socket
+        preview_shitter_output_node.file_slots.remove(preview_shitter_output_node.inputs[0])
+        # add output node input socket
+        preview_shitter_output_node.file_slots.new(preview_group_name + '_')
+
+        bpy.context.scene.node_tree.links.new(preview_shitter_node.outputs[0], preview_shitter_output_node.inputs[0])
+
+        x_count +=-2
+
+
       # connect renderlayer output to preview shitter input
 
 
 
 
       # add x for next node
-      x_count += -1
+      x_count += -2
 
       # create output node
       output_node = nodes.new('CompositorNodeOutputFile')
@@ -820,16 +843,21 @@ class generate_render_nodes(bpy.types.Operator):
       # add output node input socket
       output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_')
 
-      ''' 
-      
-      -------------------------------------------------
-      link output to input or previewer
-      -------------------------------------------------
 
-      V--- to input is below ---V
-
-      '''
-
+      if self.previewer_use == True:
+        if render_layer_is_AO:
+          bpy.context.scene.node_tree.links.new(input_node.outputs[0], preview_shitter_node.inputs['main'])
+          index_AO = input_node.outputs.find('AO')
+          bpy.context.scene.node_tree.links.new(input_node.outputs[index_AO], preview_shitter_node.inputs['main-AO'])
+        elif render_layer_is_height:
+          bpy.context.scene.node_tree.links.new(input_node.outputs[0], preview_shitter_node.inputs['height'])
+        elif render_layer_is_normal:
+          bpy.context.scene.node_tree.links.new(input_node.outputs[0], preview_shitter_node.inputs['Z-normal'])
+        elif render_layer_is_shadow:
+          index_shadow = input_node.outputs.find('Shadow')
+          bpy.context.scene.node_tree.links.new(input_node.outputs[index_shadow], preview_shitter_node.inputs['shadow'])
+        else:
+          bpy.context.scene.node_tree.links.new(input_node.outputs[0], preview_shitter_node.inputs['main'])
 
       # exception to change to shadow pass
       if render_layer_is_shadow == True and self.shadow_identifier_use == True:
