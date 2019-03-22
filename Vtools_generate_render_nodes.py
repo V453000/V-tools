@@ -778,7 +778,9 @@ class generate_render_nodes(bpy.types.Operator):
         print('...layer identified as normal')
 
       # create a Preview shitter group for base_name if it does not yet exist
-      if nodes.get(preview_group_name) is None and self.previewer_use == True:
+      if nodes.get(preview_group_name) is not None:
+        preview_shitter_node = nodes[preview_group_name]
+      elif nodes.get(preview_group_name) is None and self.previewer_use == True:
         print('Adding', preview_group_name)
         preview_shitter_node = nodes.new('CompositorNodeGroup')
         preview_shitter_node.node_tree = bpy.data.node_groups['PreviewShitter']
@@ -786,7 +788,6 @@ class generate_render_nodes(bpy.types.Operator):
         preview_shitter_node.label = preview_shitter_node.name
         preview_shitter_node.location = (x_count*x_multiplier, y_count*y_multiplier)
         preview_shitter_node.width = x_multiplier-30
-
         x_count += 2
         preview_shitter_output_node = nodes.new('CompositorNodeOutputFile')
         preview_shitter_output_node.location = (x_count*x_multiplier, y_count*y_multiplier)
@@ -803,12 +804,12 @@ class generate_render_nodes(bpy.types.Operator):
         bpy.context.scene.node_tree.links.new(preview_shitter_node.outputs[0], preview_shitter_output_node.inputs[0])
 
         x_count +=-2
+      else:
+        preview_shitter_node = nodes[preview_group_name]
+
 
 
       # connect renderlayer output to preview shitter input
-
-
-
 
       # add x for next node
       x_count += -2
