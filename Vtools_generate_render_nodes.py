@@ -93,12 +93,17 @@ class generate_render_nodes(bpy.types.Operator):
   )
   regenerate_shadow_shitter = bpy.props.BoolProperty(
     name = 'Regenerate Shadow Shitter',
-    description = 'Delete the nodes in current Shadow Shitter and create new ones.',
+    description = 'Delete the nodes in current SHADOW Shitter and create new ones.',
     default = False
   )  
   regenerate_preview_shitter = bpy.props.BoolProperty(
     name = 'Regenerate Preview Shitter',
-    description = 'Delete the nodes in current preview Shitter and create new ones.',
+    description = 'Delete the nodes in current PREVIEW Shitter and create new ones.',
+    default = False
+  )
+  regenerate_resize_shitter = bpy.props.BoolProperty(
+    name = 'Regenerate Resize Shitter',
+    description = 'Delete the nodes in current RESIZE Shitter and create new ones.',
     default = False
   )
   regenerate_height_material = bpy.props.BoolProperty(
@@ -347,54 +352,317 @@ class generate_render_nodes(bpy.types.Operator):
 
 
 
-    # destroy preview shitter if desired by settings
+    # destroy PREVIEW shitter if desired by settings
     if self.regenerate_preview_shitter == True:
       if bpy.data.node_groups.get('PreviewShitter') is not None:
         bpy.data.node_groups.remove(bpy.data.node_groups['PreviewShitter'])
     # check if preview shitter exists, if not, create it
     nodes = bpy.context.scene.node_tree.nodes
+
+    x_count = 0
+    y_count = 0
+    x_multiplier = 320
+    y_multiplier = -200
+    node_width = 270
+
     if bpy.data.node_groups.get('PreviewShitter') is None:
       preview_shitter = bpy.data.node_groups.new(type = 'CompositorNodeTree', name = 'PreviewShitter')
 
-      preview_shitter.inputs.new('NodeSocketFloat', 'Image')
-      input_node = preview_shitter.nodes.new('NodeGroupInput')
+      preview_shitter.inputs.new('NodeSocketFloat', 'main')
+      preview_shitter.inputs.new('NodeSocketFloat', 'main-AO')
+      preview_shitter.inputs.new('NodeSocketFloat', 'height')
+      preview_shitter.inputs.new('NodeSocketFloat', 'Z-normal')
+      preview_shitter.inputs.new('NodeSocketFloat', 'shadow')
+      preview_shitter.inputs['main'].default_value     = 0.5
+      preview_shitter.inputs['main-AO'].default_value  = 1
+      preview_shitter.inputs['height'].default_value   = 0
+      preview_shitter.inputs['Z-normal'].default_value = 0
+      preview_shitter.inputs['shadow'].default_value   = 1
+      
+      input_node = preview_shitter.nodes.new(type = 'NodeGroupInput')
       input_node.name = 'PreviewShitter-Input'
+      input_node.label = input_node.name
+      input_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      x_count+=1
+
+      AO_invert_node = preview_shitter.nodes.new(type = 'CompositorNodeInvert')
+      AO_invert_node.name = 'PreviewShitter-AO-Invert'
+      AO_invert_node.label = AO_invert_node.name
+      AO_invert_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      AO_invert_node.width            = node_width
+      AO_invert_node.use_custom_color = True
+      AO_invert_node.color            = (1, 0.873463, 0.603827)
+      x_count+=1
+      
+      AO_set_alpha_node = preview_shitter.nodes.new(type = 'CompositorNodeSetAlpha')
+      AO_set_alpha_node.name = 'PreviewShitter-AO-SetAlpha'
+      AO_set_alpha_node.label = AO_set_alpha_node.name
+      AO_set_alpha_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      AO_set_alpha_node.width            = node_width
+      AO_set_alpha_node.use_custom_color = True
+      AO_set_alpha_node.color            = (1, 0.873463, 0.603827)
+      x_count+=1
+      
+      AO_multiply_node = preview_shitter.nodes.new(type = 'CompositorNodeMixRGB')
+      AO_multiply_node.name = 'PreviewShitter-AO-Multiply'
+      AO_multiply_node.label = AO_multiply_node.name
+      AO_multiply_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      AO_multiply_node.width = node_width
+      AO_multiply_node.use_custom_color = True
+      AO_multiply_node.color = (1, 0.873463, 0.603827)
+      AO_multiply_node.blend_type = 'MULTIPLY'
+      AO_multiply_node.use_alpha = True
+      y_count+=1
+      
+      height_set_alpha_node = preview_shitter.nodes.new(type = 'CompositorNodeSetAlpha')
+      height_set_alpha_node.name = 'PreviewShitter-Height-SetAlpha'
+      height_set_alpha_node.label = height_set_alpha_node.name
+      height_set_alpha_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      height_set_alpha_node.width = node_width
+      height_set_alpha_node.use_custom_color = True
+      height_set_alpha_node.color = (0.890884, 1, 0.787412)
+      x_count+=1
+      
+      height_add_node = preview_shitter.nodes.new(type = 'CompositorNodeMixRGB')
+      height_add_node.name = 'PreviewShitter-Height-Add'
+      height_add_node.label = height_add_node.name
+      height_add_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      height_add_node.width = node_width
+      height_add_node.use_custom_color = True
+      height_add_node.color = (0.890884, 1, 0.787412)
+      height_add_node.blend_type = 'ADD'
+      height_add_node.use_alpha = True
+      y_count+=1
+      
+      normal_set_alpha_node = preview_shitter.nodes.new(type = 'CompositorNodeSetAlpha')
+      normal_set_alpha_node.name = 'PreviewShitter-Normal-SetAlpha'
+      normal_set_alpha_node.label = normal_set_alpha_node.name
+      normal_set_alpha_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      normal_set_alpha_node.width = node_width
+      normal_set_alpha_node.use_custom_color = True
+      normal_set_alpha_node.color = (0.787412, 0.971302, 1)
+      x_count+=1
+      
+      normal_add_node = preview_shitter.nodes.new(type = 'CompositorNodeMixRGB')
+      normal_add_node.name = 'PreviewShitter-Normal-Add'
+      normal_add_node.label = normal_add_node.name
+      normal_add_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      normal_add_node.width = node_width
+      normal_add_node.use_custom_color = True
+      normal_add_node.color = (0.787412, 0.971302, 1)
+      normal_add_node.blend_type = 'ADD'
+      normal_add_node.use_alpha = True
+      y_count+=1
+
+      shadow_invert_node = preview_shitter.nodes.new(type = 'CompositorNodeInvert')
+      shadow_invert_node.name = 'PreviewShitter-Shadow-Invert'
+      shadow_invert_node.label = shadow_invert_node.name
+      shadow_invert_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      shadow_invert_node.width = node_width
+      shadow_invert_node.use_custom_color = True
+      shadow_invert_node.color = (0.550994, 0.615665, 0.698193)
+      x_count+=1
+      
+      shadow_opacity_multiply_node = preview_shitter.nodes.new(type = 'CompositorNodeMath')
+      shadow_opacity_multiply_node.name = 'PreviewShitter-Shadow-Opacity-Multiply'
+      shadow_opacity_multiply_node.label = shadow_opacity_multiply_node.name
+      shadow_opacity_multiply_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      shadow_opacity_multiply_node.width = node_width
+      shadow_opacity_multiply_node.use_custom_color = True
+      shadow_opacity_multiply_node.color = (0.550994, 0.615665, 0.698193)
+      shadow_opacity_multiply_node.operation = 'MULTIPLY'
+      x_count+=1
+      
+      shadow_set_alpha_node = preview_shitter.nodes.new(type = 'CompositorNodeSetAlpha')
+      shadow_set_alpha_node.name = 'PreviewShitter-Shadow-SetAlpha'
+      shadow_set_alpha_node.label = shadow_set_alpha_node.name
+      shadow_set_alpha_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      shadow_set_alpha_node.width = node_width
+      shadow_set_alpha_node.use_custom_color = True
+      shadow_set_alpha_node.color = (0.550994, 0.615665, 0.698193)
+      x_count+=1
+      
+      shadow_alpha_over_node = preview_shitter.nodes.new(type = 'CompositorNodeAlphaOver')
+      shadow_alpha_over_node.name = 'PreviewShitter-Shadow-AlphaOver'
+      shadow_alpha_over_node.label = shadow_alpha_over_node.name
+      shadow_alpha_over_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      shadow_alpha_over_node.width = node_width
+      shadow_alpha_over_node.use_custom_color = True
+      shadow_alpha_over_node.color = (0.550994, 0.615665, 0.698193)
+      y_count+=1
+
+      x_count=1
+      settings_separateRGBA_node = preview_shitter.nodes.new(type = 'CompositorNodeSepRGBA')
+      settings_separateRGBA_node.name = 'PreviewShitter-Settings-SeparateRGBA'
+      settings_separateRGBA_node.label = settings_separateRGBA_node.name
+      settings_separateRGBA_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      settings_separateRGBA_node.width = node_width
+      x_count+=1
+
+      settings_AO_multiply_node = preview_shitter.nodes.new(type = 'CompositorNodeMath')
+      settings_AO_multiply_node.name = 'PreviewShitter-Settings-AO-Multiply'
+      settings_AO_multiply_node.label = settings_AO_multiply_node.name
+      settings_AO_multiply_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      settings_AO_multiply_node.width = node_width
+      settings_AO_multiply_node.operation = 'MULTIPLY'
+      x_count+=1
+
+      settings_height_multiply_node = preview_shitter.nodes.new(type = 'CompositorNodeMath')
+      settings_height_multiply_node.name = 'PreviewShitter-Settings-Height-Multiply'
+      settings_height_multiply_node.label = settings_height_multiply_node.name
+      settings_height_multiply_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      settings_height_multiply_node.width = node_width
+      settings_height_multiply_node.operation = 'MULTIPLY'
+      x_count+=1
+
+      settings_normal_multiply_node = preview_shitter.nodes.new(type = 'CompositorNodeMath')
+      settings_normal_multiply_node.name = 'PreviewShitter-Settings-Normal-Multiply'
+      settings_normal_multiply_node.label = settings_normal_multiply_node.name
+      settings_normal_multiply_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      settings_normal_multiply_node.width = node_width
+      settings_normal_multiply_node.operation = 'MULTIPLY'
+      y_count+=1
+
+      x_count=1.1
+      settings_AO_value_node = preview_shitter.nodes.new(type = 'CompositorNodeValue')
+      settings_AO_value_node.name = 'PreviewShitter-Settings-AO-Value'
+      settings_AO_value_node.label = settings_AO_value_node.name
+      settings_AO_value_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      settings_AO_value_node.width = node_width
+      settings_AO_value_node.use_custom_color = True
+      settings_AO_value_node.color = (1, 0.552123, 0.2033105)
+      settings_AO_value_node.outputs[0].default_value = 1
+      x_count+=1
+      settings_height_value_node = preview_shitter.nodes.new(type = 'CompositorNodeValue')
+      settings_height_value_node.name = 'PreviewShitter-Settings-Height-Value'
+      settings_height_value_node.label = settings_height_value_node.name
+      settings_height_value_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      settings_height_value_node.width = node_width
+      settings_height_value_node.use_custom_color = True
+      settings_height_value_node.color = (0.606634, 1, 0.318547)
+      settings_height_value_node.outputs[0].default_value = 0.3
+      x_count+=1
+      settings_normal_value_node = preview_shitter.nodes.new(type = 'CompositorNodeValue')
+      settings_normal_value_node.name = 'PreviewShitter-Settings-Normal-Value'
+      settings_normal_value_node.label = settings_normal_value_node.name
+      settings_normal_value_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      settings_normal_value_node.width = node_width
+      settings_normal_value_node.use_custom_color = True
+      settings_normal_value_node.color = (0.318547, 0.888118, 1)
+      settings_normal_value_node.outputs[0].default_value = 0.2
+      x_count+=1
+      settings_shadow_value_node = preview_shitter.nodes.new(type = 'CompositorNodeValue')
+      settings_shadow_value_node.name = 'PreviewShitter-Settings-Shadow-Value'
+      settings_shadow_value_node.label = settings_shadow_value_node.name
+      settings_shadow_value_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+      settings_shadow_value_node.width = node_width
+      settings_shadow_value_node.use_custom_color = True
+      settings_shadow_value_node.color = (0.315438, 0.468448, 0.698193)
+      settings_shadow_value_node.outputs[0].default_value = 0.5
+      
+      x_count=9
+      output_node = preview_shitter.nodes.new(type = 'NodeGroupOutput')
+      output_node.name = 'PreviewShitter-Output'
+      output_node.label = output_node.name
+      output_node.location = (x_count*x_multiplier, y_count*y_multiplier)
+
+      preview_shitter.outputs.new('NodeSocketFloat', 'Preview')
+
+      # LINKS
+      # for AO_invert_node
+      preview_shitter.links.new(input_node.outputs['main-AO'], AO_invert_node.inputs[1])
+      # for AO_set_alpha_node
+      preview_shitter.links.new(input_node.outputs['main'], AO_set_alpha_node.inputs[0])
+      preview_shitter.links.new(AO_invert_node.outputs[0],  AO_set_alpha_node.inputs[1])
+      # for AO_multiply_node
+      preview_shitter.links.new(settings_AO_multiply_node.outputs[0], AO_multiply_node.inputs[0])
+      preview_shitter.links.new(input_node.outputs['main'],           AO_multiply_node.inputs[1])
+      preview_shitter.links.new(AO_set_alpha_node.outputs[0],         AO_multiply_node.inputs[2])
+      # for height_set_alpha_node
+      preview_shitter.links.new(input_node.outputs['main'],   height_set_alpha_node.inputs[0])
+      preview_shitter.links.new(input_node.outputs['height'], height_set_alpha_node.inputs[1])
+      # for height_add_node
+      preview_shitter.links.new(settings_height_multiply_node.outputs[0], height_add_node.inputs[0])
+      preview_shitter.links.new(AO_multiply_node.outputs[0],              height_add_node.inputs[1])
+      preview_shitter.links.new(height_set_alpha_node.outputs[0],         height_add_node.inputs[2])
+      # for normal_set_alpha_node
+      preview_shitter.links.new(input_node.outputs['main'],     normal_set_alpha_node.inputs[0])
+      preview_shitter.links.new(input_node.outputs['Z-normal'], normal_set_alpha_node.inputs[1])
+      # for normal_add_node
+      preview_shitter.links.new(settings_normal_multiply_node.outputs[0], normal_add_node.inputs[0])
+      preview_shitter.links.new(height_add_node.outputs[0],               normal_add_node.inputs[1])
+      preview_shitter.links.new(normal_set_alpha_node.outputs[0],         normal_add_node.inputs[2])
+      # for shadow_invert_node
+      preview_shitter.links.new(input_node.outputs['shadow'],       shadow_invert_node.inputs[1])
+      # for shadow_opacity_multiply_node
+      preview_shitter.links.new(settings_shadow_value_node.outputs[0], shadow_opacity_multiply_node.inputs[0])
+      preview_shitter.links.new(shadow_invert_node.outputs[0],         shadow_opacity_multiply_node.inputs[1])
+      # for shadow_set_alpha_node
+      preview_shitter.links.new(shadow_opacity_multiply_node.outputs[0], shadow_set_alpha_node.inputs[1])
+      # for shadow_alpha_over_node
+      preview_shitter.links.new(shadow_set_alpha_node.outputs[0], shadow_alpha_over_node.inputs[1])
+      preview_shitter.links.new(normal_add_node.outputs[0],       shadow_alpha_over_node.inputs[2])
+      # for settings_separateRGBA_node
+      preview_shitter.links.new(input_node.outputs['main'], settings_separateRGBA_node.inputs[0])
+      # for settings_AO_multiply_node
+      preview_shitter.links.new(settings_AO_value_node.outputs[0],     settings_AO_multiply_node.inputs[0])
+      preview_shitter.links.new(settings_separateRGBA_node.outputs[3], settings_AO_multiply_node.inputs[1])
+      # for settings_height_multiply_node
+      preview_shitter.links.new(settings_height_value_node.outputs[0], settings_height_multiply_node.inputs[0])
+      preview_shitter.links.new(settings_separateRGBA_node.outputs[3], settings_height_multiply_node.inputs[1])
+      # for settings_normal_multiply_node
+      preview_shitter.links.new(settings_normal_value_node.outputs[0], settings_normal_multiply_node.inputs[0])
+      preview_shitter.links.new(settings_separateRGBA_node.outputs[3], settings_normal_multiply_node.inputs[1])
+      # for output_node
+      preview_shitter.links.new(shadow_alpha_over_node.outputs[0], output_node.inputs[0])
+
+
+
+    # destroy RESIZE shitter if desired by settings
+    if self.regenerate_resize_shitter == True:
+      if bpy.data.node_groups.get('ResizeShitter') is not None:
+        bpy.data.node_groups.remove(bpy.data.node_groups['ResizeShitter'])
+    # check if preview shitter exists, if not, create it
+    nodes = bpy.context.scene.node_tree.nodes
+    if bpy.data.node_groups.get('ResizeShitter') is None:
+      resize_shitter = bpy.data.node_groups.new(type = 'CompositorNodeTree', name = 'ResizeShitter')
+
+      resize_shitter.inputs.new('NodeSocketFloat', 'Image')
+      input_node = resize_shitter.nodes.new('NodeGroupInput')
+      input_node.name = 'ResizeShitter-Input'
       input_node.label = input_node.name
       input_node.location = (-200, 0)
 
-      preview_shitter.outputs.new('NodeSocketFloat', 'Preview')
-      '''
-      preview_shitter.outputs.new('NodeSocketFloat', 'Full size')
-      preview_shitter.outputs.new('NodeSocketFloat', '50% size')
-      preview_shitter.outputs.new('NodeSocketFloat', '25% size')
-      '''
-
-      output_node = preview_shitter.nodes.new('NodeGroupOutput')
-      output_node.name = 'PreviewShitter-Output'
+      resize_shitter.outputs.new('NodeSocketFloat', 'Full size')
+      resize_shitter.outputs.new('NodeSocketFloat', '50% size')
+      resize_shitter.outputs.new('NodeSocketFloat', '25% size')
+    
+      output_node = resize_shitter.nodes.new('NodeGroupOutput')
+      output_node.name = 'ResizeShitter-Output'
       output_node.label = output_node.name
       output_node.location = (200,0)
-      '''
-      transform_node_1 = preview_shitter.nodes.new('CompositorNodeTransform')
+      
+      transform_node_1 = resize_shitter.nodes.new('CompositorNodeTransform')
       transform_node_1.filter_type = 'BILINEAR'
       transform_node_1.inputs[4].default_value = 0.5
-      transform_node_1.name = 'PreviewShitter-Transform-1'
+      transform_node_1.name = 'ResizeShitter-Transform-1'
       transform_node_1.label = transform_node_1.name
       transform_node_1.location = (0, -50)
       
-      transform_node_2 = preview_shitter.nodes.new('CompositorNodeTransform')
+      transform_node_2 = resize_shitter.nodes.new('CompositorNodeTransform')
       transform_node_2.filter_type = 'BILINEAR'
       transform_node_2.inputs[4].default_value = 0.25
-      transform_node_2.name = 'PreviewShitter-Transform-2'
+      transform_node_2.name = 'ResizeShitter-Transform-2'
       transform_node_2.label = transform_node_1.name
       transform_node_2.location = (0, -250)
 
       #link the nodes
-      preview_shitter.links.new(input_node.outputs[0], output_node.inputs[0])
-      preview_shitter.links.new(input_node.outputs[0], transform_node_1.inputs[0])
-      preview_shitter.links.new(input_node.outputs[0], transform_node_2.inputs[0])
-      preview_shitter.links.new(transform_node_1.outputs[0], output_node.inputs[1])
-      preview_shitter.links.new(transform_node_2.outputs[0], output_node.inputs[2])
-      '''
+      resize_shitter.links.new(input_node.outputs[0], output_node.inputs[0])
+      resize_shitter.links.new(input_node.outputs[0], transform_node_1.inputs[0])
+      resize_shitter.links.new(input_node.outputs[0], transform_node_2.inputs[0])
+      resize_shitter.links.new(transform_node_1.outputs[0], output_node.inputs[1])
+      resize_shitter.links.new(transform_node_2.outputs[0], output_node.inputs[2])
+      
 
     # switch scene to destination and make sure nodes are allowed
     bpy.context.screen.scene = bpy.data.scenes[render_nodes_to_scene]
