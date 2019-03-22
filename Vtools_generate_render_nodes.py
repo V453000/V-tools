@@ -8,8 +8,13 @@ class generate_render_nodes(bpy.types.Operator):
 
 
 
+  resizer_use = bpy.props.BoolProperty(
+    name = 'Use Resizer',
+    description = 'Choose whether ResizeShitter automatically downscales the outputs.',
+    default = True
+  )
   previewer_use = bpy.props.BoolProperty(
-    name = 'Use PreviewShitter',
+    name = 'Use Previewer',
     description = 'Choose whether PreviewShitter attempts to combine render passes into a render preview.',
     default = True
   )
@@ -124,6 +129,23 @@ class generate_render_nodes(bpy.types.Operator):
   )  
 
   def execute(self, context):
+    
+    def insert_resizer(output_node, node_width):
+      for link in output_node.inputs[0].links:
+        average_node_location = ( link.from_node.location + link.to_node.location ) /2
+        resizer_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeGroup')
+        resizer_node.node_tree = bpy.data.node_groups['ResizeShitter']
+        resizer_node.name = output_node.name + '-ResizeShitter'
+        resizer_node.label = resizer_node.name
+        resizer_node.location = average_node_location
+        resizer_node.width = node_width
+
+        bpy.context.scene.node_tree.links.new(link.from_socket, resizer_node.inputs[0])
+        bpy.context.scene.node_tree.links.new(resizer_node.outputs[0], link.to_socket)
+
+
+
+
     print('----------------------------------------------')
     print('   G E N E R A T E   R E N D E R    N O D E S ')
     print('----------------------------------------------')
@@ -135,7 +157,10 @@ class generate_render_nodes(bpy.types.Operator):
     render_layers_from_scene = bpy.context.scene.name   
     render_nodes_to_scene = bpy.context.scene.name
 
-    output_folder = "//OUTPUT\\"
+    output_folder      = '//OUTPUT\\'
+    output_folder_x128 = '//OUTPUT-x128\\'
+    output_folder_x64  = '//OUTPUT-x64\\'
+    output_folder_x32  = '//OUTPUT-x32\\'
     appendix_AO =     self.AO_identifier #'main'
     appendix_shadow = self.shadow_identifier #'shadow' 
     appendix_height = self.height_identifier #'height' 
@@ -802,6 +827,9 @@ class generate_render_nodes(bpy.types.Operator):
         preview_shitter_output_node.file_slots.new(preview_group_name + '_')
 
         bpy.context.scene.node_tree.links.new(preview_shitter_node.outputs[0], preview_shitter_output_node.inputs[0])
+        # add resizer
+        if self.resizer_use == True:
+          insert_resizer(preview_shitter_output_node, x_multiplier-30)
 
         x_count +=-2
       else:
@@ -875,22 +903,36 @@ class generate_render_nodes(bpy.types.Operator):
         
         bpy.context.scene.node_tree.links.new(input_node.outputs[index_shadow], shadow_shitter.inputs[0])
         bpy.context.scene.node_tree.links.new(shadow_shitter.outputs[0], output_node.inputs[0])
+        # add resizer
+        if self.resizer_use == True:
+          insert_resizer(output_node, x_multiplier-30)
 
         continue
 
       # exception to add AO pass
       if render_layer_is_AO == True and self.AO_identifier_use == True:
         bpy.context.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
-        
+        # add resizer
+        if self.resizer_use == True:
+          insert_resizer(output_node, x_multiplier-30)
+
         # connect to output_node_AO
         #output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_')
         index_AO = input_node.outputs.find('AO')
         bpy.context.scene.node_tree.links.new(input_node.outputs[index_AO], output_node_AO.inputs[0])
+        # add resizer
+        if self.resizer_use == True:
+          insert_resizer(output_node_AO, x_multiplier-30)
+
         continue
 
 
       # link the nodes
       bpy.context.screen.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
+     
+      # add resizer
+      if self.resizer_use == True:
+        insert_resizer(output_node, x_multiplier-30)
 
       print('-> Finished processing', render_layer_name)
       print('----------')
