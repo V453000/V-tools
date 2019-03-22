@@ -750,7 +750,7 @@ class generate_render_nodes(bpy.types.Operator):
       # read if render layer is shadow/AO/height/normal/...
       print('RenderLayer name:',render_layer_name)
       # remove the shadow/AO/height/normal/... identifier and  get a base_name (add scene name)
-      preview_group_name = render_layer_name
+      preview_group_name = bpy.context.scene.name + '_' + render_layer_name
       if render_layer_is_shadow == True:
         if self.shadow_identifier_position == 'back':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[:-appendix_shadow_char_count]
