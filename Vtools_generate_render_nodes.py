@@ -130,7 +130,7 @@ class generate_render_nodes(bpy.types.Operator):
 
   def execute(self, context):
     
-    def insert_resizer(output_node, node_width):
+    def insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name):
       for link in output_node.inputs[0].links:
         average_node_location = ( link.from_node.location + link.to_node.location ) /2
         resizer_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -143,8 +143,39 @@ class generate_render_nodes(bpy.types.Operator):
         bpy.context.scene.node_tree.links.new(link.from_socket, resizer_node.inputs[0])
         bpy.context.scene.node_tree.links.new(resizer_node.outputs[0], link.to_socket)
 
+        # resizer outputs
+        full_resolution =    str(int(bpy.context.scene.render.resolution_x * bpy.context.scene.render.resolution_percentage)/1/100)[:-2]
+        half_resolution =    str(int(bpy.context.scene.render.resolution_x * bpy.context.scene.render.resolution_percentage)/2/100)[:-2]
+        quarter_resolution = str(int(bpy.context.scene.render.resolution_x * bpy.context.scene.render.resolution_percentage)/4/100)[:-2]
 
+        half_output_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeOutputFile')
+        half_output_node.name = output_node.name + '-50%-output'
+        half_output_node.label = half_output_node.name
+        half_output_node.file_slots.remove(half_output_node.inputs[0])
+        if link.from_node.name[-14:] == 'PreviewShitter':
+          half_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + half_resolution
+          half_output_node.file_slots.new(preview_group_name + 'PREVIEW' + '_' + full_resolution + 'to' + half_resolution + '_')
+        else:
+          half_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + half_resolution + '\\' + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name
+          half_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_' + full_resolution + 'to' + half_resolution + '_')
+        half_output_node.location = (output_node.location[0], output_node.location[1]-100)
+        half_output_node.width = x_multiplier-30+150
 
+        quarter_output_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeOutputFile')
+        quarter_output_node.name = output_node.name + '-25%-output'
+        quarter_output_node.label = quarter_output_node.name
+        quarter_output_node.file_slots.remove(quarter_output_node.inputs[0])
+        if link.from_node.name[-14:] == 'PreviewShitter':
+          quarter_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + quarter_resolution
+          quarter_output_node.file_slots.new(preview_group_name + 'PREVIEW' + '_' + full_resolution + 'to' + quarter_resolution + '_')
+        else:
+          quarter_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + quarter_resolution + '\\' + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name
+          quarter_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_' + full_resolution + 'to' + quarter_resolution + '_')
+        quarter_output_node.location = (half_output_node.location[0], half_output_node.location[1]-100)
+        quarter_output_node.width = x_multiplier-30+150
+
+        bpy.context.scene.node_tree.links.new(resizer_node.outputs[1], half_output_node.inputs[0])
+        bpy.context.scene.node_tree.links.new(resizer_node.outputs[2], quarter_output_node.inputs[0])
 
     print('----------------------------------------------')
     print('   G E N E R A T E   R E N D E R    N O D E S ')
@@ -158,9 +189,6 @@ class generate_render_nodes(bpy.types.Operator):
     render_nodes_to_scene = bpy.context.scene.name
 
     output_folder      = '//OUTPUT\\'
-    output_folder_x128 = '//OUTPUT-x128\\'
-    output_folder_x64  = '//OUTPUT-x64\\'
-    output_folder_x32  = '//OUTPUT-x32\\'
     appendix_AO =     self.AO_identifier #'main'
     appendix_shadow = self.shadow_identifier #'shadow' 
     appendix_height = self.height_identifier #'height' 
@@ -803,33 +831,34 @@ class generate_render_nodes(bpy.types.Operator):
         print('...layer identified as normal')
 
       # create a Preview shitter group for base_name if it does not yet exist
-      if nodes.get(preview_group_name) is not None:
-        preview_shitter_node = nodes[preview_group_name]
-      elif nodes.get(preview_group_name) is None and self.previewer_use == True:
-        print('Adding', preview_group_name)
+      preview_shitter_node_name = preview_group_name+'PreviewShitter'
+      if nodes.get(preview_shitter_node_name) is not None:
+        preview_shitter_node = nodes[preview_shitter_node_name]
+      elif nodes.get(preview_shitter_node_name) is None and self.previewer_use == True:
+        print('Adding', preview_shitter_node_name)
         preview_shitter_node = nodes.new('CompositorNodeGroup')
         preview_shitter_node.node_tree = bpy.data.node_groups['PreviewShitter']
-        preview_shitter_node.name = preview_group_name
+        preview_shitter_node.name = preview_shitter_node_name
         preview_shitter_node.label = preview_shitter_node.name
         preview_shitter_node.location = (x_count*x_multiplier, y_count*y_multiplier)
         preview_shitter_node.width = x_multiplier-30
         x_count += 2
         preview_shitter_output_node = nodes.new('CompositorNodeOutputFile')
         preview_shitter_output_node.location = (x_count*x_multiplier, y_count*y_multiplier)
-        preview_shitter_output_node.name = 'file-output-' + render_layer_name
-        preview_shitter_output_node.label = 'file-output-' + render_layer_name
-        preview_shitter_output_node.width = x_multiplier-30
+        preview_shitter_output_node.name = 'file-output-' + render_layer_name + '-PREVIEW'
+        preview_shitter_output_node.label = preview_shitter_output_node.name
+        preview_shitter_output_node.width = x_multiplier-30+150
 
         preview_shitter_output_node.base_path = output_folder[:-1] + '-PREVIEW'
         # remove output node default input socket
         preview_shitter_output_node.file_slots.remove(preview_shitter_output_node.inputs[0])
         # add output node input socket
-        preview_shitter_output_node.file_slots.new(preview_group_name + '_')
+        preview_shitter_output_node.file_slots.new(preview_group_name + 'PREVIEW' + '_')
 
         bpy.context.scene.node_tree.links.new(preview_shitter_node.outputs[0], preview_shitter_output_node.inputs[0])
         # add resizer
         if self.resizer_use == True:
-          insert_resizer(preview_shitter_output_node, x_multiplier-30)
+          insert_resizer(preview_shitter_output_node, x_multiplier, output_folder, render_layer_name, preview_group_name)
 
         x_count +=-2
       else:
@@ -847,7 +876,7 @@ class generate_render_nodes(bpy.types.Operator):
       output_node.location = (x_count*x_multiplier, y_count*y_multiplier)
       output_node.name = 'file-output-' + render_layer_name
       output_node.label = 'file-output-' + render_layer_name
-      output_node.width = x_multiplier-30
+      output_node.width = x_multiplier-30+150
 
       output_node.base_path = output_folder + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name
 
@@ -857,7 +886,7 @@ class generate_render_nodes(bpy.types.Operator):
         output_node_AO.location = (x_count*x_multiplier, y_count*y_multiplier - 140)
         output_node_AO.name = 'file-output-' + render_layer_name + '-AO'
         output_node_AO.label = 'file-output-' + render_layer_name + '-AO'
-        output_node_AO.width = x_multiplier-30
+        output_node_AO.width = x_multiplier-30+150
 
         output_node_AO.file_slots.remove(output_node_AO.inputs[0])
         output_node_AO.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_')
@@ -905,7 +934,7 @@ class generate_render_nodes(bpy.types.Operator):
         bpy.context.scene.node_tree.links.new(shadow_shitter.outputs[0], output_node.inputs[0])
         # add resizer
         if self.resizer_use == True:
-          insert_resizer(output_node, x_multiplier-30)
+          insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name)
 
         continue
 
@@ -914,7 +943,7 @@ class generate_render_nodes(bpy.types.Operator):
         bpy.context.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
         # add resizer
         if self.resizer_use == True:
-          insert_resizer(output_node, x_multiplier-30)
+          insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name)
 
         # connect to output_node_AO
         #output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_')
@@ -922,7 +951,7 @@ class generate_render_nodes(bpy.types.Operator):
         bpy.context.scene.node_tree.links.new(input_node.outputs[index_AO], output_node_AO.inputs[0])
         # add resizer
         if self.resizer_use == True:
-          insert_resizer(output_node_AO, x_multiplier-30)
+          insert_resizer(output_node_AO, x_multiplier, output_folder, render_layer_name, preview_group_name)
 
         continue
 
@@ -932,7 +961,7 @@ class generate_render_nodes(bpy.types.Operator):
      
       # add resizer
       if self.resizer_use == True:
-        insert_resizer(output_node, x_multiplier-30)
+        insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name)
 
       print('-> Finished processing', render_layer_name)
       print('----------')
