@@ -30,6 +30,7 @@ if "bpy" in locals():
     importlib.reload(Vtools_object_draw_type)
     importlib.reload(Vtools_default_render_settings)
     importlib.reload(Vtools_generate_render_nodes)
+    importlib.reload(Vtools_generate_render_nodes_with_resize)
     importlib.reload(Vtools_link_mesh_data)
     importlib.reload(Vtools_clean_material_slots)
     importlib.reload(Vtools_unpack_images)
@@ -65,6 +66,7 @@ if "bpy" in locals():
   from . import Vtools_object_draw_type
   from . import Vtools_default_render_settings
   from . import Vtools_generate_render_nodes
+  from . import Vtools_generate_render_nodes_with_resize
   from . import Vtools_link_mesh_data
   from . import Vtools_clean_material_slots
   from . import Vtools_unpack_images
@@ -100,6 +102,7 @@ if "bpy" in locals():
 object_draw_mode =        Vtools_object_draw_type.object_draw_mode
 default_render_settings = Vtools_default_render_settings.default_render_settings
 generate_render_nodes =   Vtools_generate_render_nodes.generate_render_nodes
+generate_render_nodes_with_resize =   Vtools_generate_render_nodes_with_resize.generate_render_nodes_with_resize
 link_mesh_data =          Vtools_link_mesh_data.link_mesh_data
 clean_material_slots =    Vtools_clean_material_slots.clean_material_slots
 unpack_images =           Vtools_unpack_images.unpack_images
@@ -161,9 +164,12 @@ class tool_panel_scene(bpy.types.Panel):
 
   def draw(self,context):
     layout = self.layout
-    layout.operator('render.default_render_settings', text = 'Default Render Settings', icon = 'RESTRICT_RENDER_OFF')
-    layout.operator('nodes.generate_render_nodes'   , text = 'Generate Render Nodes'  , icon = 'NODETREE'           )
-    layout.operator('scene.duplicate_render_layer'  , text = 'Duplicate RenderLayer'  , icon = 'RENDERLAYERS'       )
+    layout.operator('render.default_render_settings', text = 'Default Render Settings', icon = 'RESTRICT_RENDER_OFF'  )
+    row = layout.row()
+    row.operator('nodes.generate_render_nodes'             , text = 'Generate Render Nodes'  , icon = 'NODETREE'      )
+    row.operator('nodes.generate_render_nodes_with_resize' , text = '... with Resizing'        , icon = 'ZOOM_SELECTED' )
+    layout = self.layout
+    layout.operator('scene.duplicate_render_layer'  , text = 'Duplicate RenderLayer'  , icon = 'RENDERLAYERS'         )
 
 class tool_panel_object(bpy.types.Panel):
   bl_space_type = 'VIEW_3D'
@@ -270,7 +276,9 @@ class render_layer_panel(bpy.types.Panel):
   def draw(self,context):
     layout = self.layout
     layout.operator('scene.duplicate_render_layer'  , text = 'Duplicate Render Layer' , icon = 'RENDERLAYERS'       )
-    layout.operator('nodes.generate_render_nodes'   , text = 'Generate Render Nodes'  , icon = 'NODETREE'           )
+    row = layout.row()
+    row.operator('nodes.generate_render_nodes'   , text = 'Generate Render Nodes'  , icon = 'NODETREE'           )
+    row.operator('nodes.generate_render_nodes_with_resize' , text = '... with Resizing'        , icon = 'ZOOM_SELECTED' )
 
 class material_panel(bpy.types.Panel):
   bl_space_type = 'PROPERTIES'
@@ -386,6 +394,7 @@ def register():
   # Operators
   bpy.utils.register_class(object_draw_mode)
   bpy.utils.register_class(generate_render_nodes)
+  bpy.utils.register_class(generate_render_nodes_with_resize)
   bpy.utils.register_class(default_render_settings)
   bpy.utils.register_class(link_mesh_data)
   bpy.utils.register_class(clean_material_slots)
@@ -443,6 +452,7 @@ def unregister():
   # Operators
   bpy.utils.unregister_class(object_draw_mode)
   bpy.utils.unregister_class(generate_render_nodes)
+  bpy.utils.unregister_class(generate_render_nodes_with_resize)
   bpy.utils.unregister_class(default_render_settings)
   bpy.utils.unregister_class(link_mesh_data)
   bpy.utils.unregister_class(clean_material_slots)

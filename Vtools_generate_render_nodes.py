@@ -11,7 +11,7 @@ class generate_render_nodes(bpy.types.Operator):
   resizer_use = bpy.props.BoolProperty(
     name = 'Use Resizer',
     description = 'Choose whether ResizeShitter automatically downscales the outputs.',
-    default = True
+    default = False
   )
   previewer_use = bpy.props.BoolProperty(
     name = 'Use Previewer',
@@ -233,6 +233,9 @@ class generate_render_nodes(bpy.types.Operator):
       height_mtl.use_nodes = True
       height_nodes = height_mtl.node_tree.nodes
     if self.regenerate_height_material == True or height_material_existed == False:
+      height_mtl = bpy.data.materials['HEIGHT']
+      height_mtl.use_nodes = True
+      height_nodes = height_mtl.node_tree.nodes
       # remove all nodes first
       for node in height_nodes:
         height_nodes.remove(node)
@@ -280,6 +283,9 @@ class generate_render_nodes(bpy.types.Operator):
       normal_nodes = normal_mtl.node_tree.nodes
     # generate nodes for Z-NORMAL material
     if self.regenerate_normal_material == True or normal_material_existed == False:
+      normal_mtl = bpy.data.materials['Z-NORMAL']
+      normal_mtl.use_nodes = True
+      normal_nodes = normal_mtl.node_tree.nodes
       # remove all nodes first
       for node in normal_nodes:
         normal_nodes.remove(node)
@@ -733,7 +739,7 @@ class generate_render_nodes(bpy.types.Operator):
 
     nodes = bpy.context.scene.node_tree.nodes
     x_multiplier = 300
-    y_multiplier = -500
+    y_multiplier = -680
     y_count = 0
     for render_layer_name in render_layer_list:
       x_count = 0
@@ -883,7 +889,7 @@ class generate_render_nodes(bpy.types.Operator):
       # create extra output node for AO
       if render_layer_is_AO == True and self.AO_identifier_use == True:
         output_node_AO = nodes.new('CompositorNodeOutputFile')
-        output_node_AO.location = (x_count*x_multiplier, y_count*y_multiplier - 140)
+        output_node_AO.location = (x_count*x_multiplier, y_count*y_multiplier - 140 - 180)
         output_node_AO.name = 'file-output-' + render_layer_name + '-AO'
         output_node_AO.label = 'file-output-' + render_layer_name + '-AO'
         output_node_AO.width = x_multiplier-30+150
