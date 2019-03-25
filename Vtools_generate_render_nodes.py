@@ -16,7 +16,7 @@ class generate_render_nodes(bpy.types.Operator):
   previewer_use = bpy.props.BoolProperty(
     name = 'Use Previewer',
     description = 'Choose whether PreviewShitter attempts to combine render passes into a render preview.',
-    default = True
+    default = False
   )
 
   AO_identifier_use = bpy.props.BoolProperty(
