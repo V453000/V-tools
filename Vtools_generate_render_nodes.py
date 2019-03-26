@@ -169,8 +169,9 @@ class generate_render_nodes(bpy.types.Operator):
           half_output_node.file_slots.new(preview_group_name + 'PREVIEW' + '_' + full_resolution + 'to' + half_resolution + '_')
         else:
           #half_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + half_resolution + '\\' + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name
-          half_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + half_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name
-          half_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_' + full_resolution + 'to' + half_resolution + '_')
+          if render_layer_is_AO == False:
+            half_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + half_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name
+            half_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_' + full_resolution + 'to' + half_resolution + '_')
           if render_layer_is_AO == True:
             half_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + half_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name + '-AO'
             half_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_' + full_resolution + 'to' + half_resolution + '_')
@@ -185,8 +186,9 @@ class generate_render_nodes(bpy.types.Operator):
           quarter_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + quarter_resolution
           quarter_output_node.file_slots.new(preview_group_name + 'PREVIEW' + '_' + full_resolution + 'to' + quarter_resolution + '_')
         else:
-          quarter_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + quarter_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name
-          quarter_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_' + full_resolution + 'to' + quarter_resolution + '_')
+          if render_layer_is_AO == False:
+            quarter_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + quarter_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name
+            quarter_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_' + full_resolution + 'to' + quarter_resolution + '_')
           if render_layer_is_AO == True:
             quarter_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + quarter_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name + '-AO'
             quarter_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_' + full_resolution + 'to' + quarter_resolution + '_')
