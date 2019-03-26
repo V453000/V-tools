@@ -150,7 +150,18 @@ class generate_render_nodes(bpy.types.Operator):
         full_resolution =    str(int(bpy.context.scene.render.resolution_x * bpy.context.scene.render.resolution_percentage)/1/100)[:-2]
         half_resolution =    str(int(bpy.context.scene.render.resolution_x * bpy.context.scene.render.resolution_percentage)/2/100)[:-2]
         quarter_resolution = str(int(bpy.context.scene.render.resolution_x * bpy.context.scene.render.resolution_percentage)/4/100)[:-2]
+        to_half_res    = full_resolution + 'to' + half_resolution
+        to_quarter_res = full_resolution + 'to' + quarter_resolution
 
+        # create basic half_output node
+        half_output_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeOutputFile')
+        half_output_node.name = output_node.name + '-50%-output'
+        half_output_node.label = half_output_node.name
+        half_output_node.file_slots.remove(half_output_node.inputs[0])
+        half_output_node.location = (output_node.location[0], output_node.location[1]-100)
+        half_output_node.width = x_multiplier-30+150
+
+        # find the output path for the node
         output_base_path = output_node.base_path
         output_base_path_first_half = output_base_path.split('\\')[0]
         output_base_path_second_half = ''
@@ -160,41 +171,57 @@ class generate_render_nodes(bpy.types.Operator):
         if i > 1:
           output_base_path_second_half = '\\' + output_base_path.split('\\')[1]
 
-        half_output_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeOutputFile')
-        half_output_node.name = output_node.name + '-50%-output'
-        half_output_node.label = half_output_node.name
-        half_output_node.file_slots.remove(half_output_node.inputs[0])
+        #--------------------------------------------------------------------------------------------------------
+
+        # handle AO
+        output_render_layer_name = render_layer_name
+        print('input socket name is...', link.from_socket.name)
+        if link.from_socket.name == 'AO':
+          print('INPUT SOCKET IS AOOOOOOO')
+          output_render_layer_name = output_render_layer_name + '-AO'
+
+        # handle PreviewShitter outputs for FOLDER (base_path)
         if link.from_node.name[-14:] == 'PreviewShitter':
-          half_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + half_resolution
-          half_output_node.file_slots.new(preview_group_name + 'PREVIEW' + '_' + full_resolution + 'to' + half_resolution + '_')
+          resizer_output_base_path_half    = '//OUTPUT-PREVIEW'
+          resizer_output_base_path_quarter = '//OUTPUT-PREVIEW'
         else:
-          #half_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + half_resolution + '\\' + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name
-          if render_layer_is_AO == False:
-            half_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + half_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name
-            half_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_' + full_resolution + 'to' + half_resolution + '_')
-          if render_layer_is_AO == True:
-            half_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + half_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name + '-AO'
-            half_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_' + full_resolution + 'to' + half_resolution + '_')
-        half_output_node.location = (output_node.location[0], output_node.location[1]-100)
-        half_output_node.width = x_multiplier-30+150
+          resizer_output_base_path_half    = output_base_path_first_half + '_' + to_half_res    + output_base_path_second_half + '/' + bpy.context.scene.name +  output_render_layer_name
+          resizer_output_base_path_quarter = output_base_path_first_half + '_' + to_quarter_res + output_base_path_second_half + '/' + bpy.context.scene.name +  output_render_layer_name
+
+        # handle PreviewShitter outputs for FILENAME (file_slot)
+        if link.from_node.name[-14:] == 'PreviewShitter':
+          output_filename_half    = preview_group_name + 'PREVIEW' + '_' + to_half_res    + '_'
+          output_filename_quarter = preview_group_name + 'PREVIEW' + '_' + to_quarter_res + '_'
+        else:
+          output_filename_half    = bpy.context.scene.name + '_' + output_render_layer_name + '_' + to_half_res    + '_'
+          output_filename_quarter = bpy.context.scene.name + '_' + output_render_layer_name + '_' + to_quarter_res + '_'
+        
+
+        #--------------------------------------------------------------------------------------------------------
+        half_output_node.base_path = resizer_output_base_path_half
+        half_output_node.file_slots.new( output_filename_half )
+          
 
         quarter_output_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeOutputFile')
         quarter_output_node.name = output_node.name + '-25%-output'
         quarter_output_node.label = quarter_output_node.name
         quarter_output_node.file_slots.remove(quarter_output_node.inputs[0])
-        if link.from_node.name[-14:] == 'PreviewShitter':
-          quarter_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + quarter_resolution
-          quarter_output_node.file_slots.new(preview_group_name + 'PREVIEW' + '_' + full_resolution + 'to' + quarter_resolution + '_')
-        else:
-          if render_layer_is_AO == False:
-            quarter_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + quarter_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name
-            quarter_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_' + full_resolution + 'to' + quarter_resolution + '_')
-          if render_layer_is_AO == True:
-            quarter_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + quarter_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name + '-AO'
-            quarter_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_' + full_resolution + 'to' + quarter_resolution + '_')
         quarter_output_node.location = (half_output_node.location[0], half_output_node.location[1]-100)
         quarter_output_node.width = x_multiplier-30+150
+        #if link.from_node.name[-14:] == 'PreviewShitter':
+        #  quarter_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + quarter_resolution
+        #  quarter_output_node.file_slots.new(preview_group_name + 'PREVIEW' + '_' + full_resolution + 'to' + quarter_resolution + '_')
+        #else:
+        #  if render_layer_is_AO == False:
+        #    quarter_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + quarter_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name
+        #    quarter_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_' + full_resolution + 'to' + quarter_resolution + '_')
+        #  if render_layer_is_AO == True:
+        #    quarter_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + quarter_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name + '-AO'
+        #    quarter_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_' + full_resolution + 'to' + quarter_resolution + '_')
+        quarter_output_node.base_path = resizer_output_base_path_quarter
+        quarter_output_node.file_slots.new( output_filename_quarter )
 
+        # link the resizer to the output nodes
         bpy.context.scene.node_tree.links.new(resizer_node.outputs[1], half_output_node.inputs[0])
         bpy.context.scene.node_tree.links.new(resizer_node.outputs[2], quarter_output_node.inputs[0])
 
@@ -758,6 +785,24 @@ class generate_render_nodes(bpy.types.Operator):
       for node in bpy.context.scene.node_tree.nodes:
         bpy.context.scene.node_tree.nodes.remove(node)
 
+
+
+    # -----------------------------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------------------------
+    # -----------------------  FFFFFFF      U       U         CCCCC       K      K     --------------
+    # -----------------------  F            U       U        C     C      K    K       --------------
+    # -----------------------  F            U       U       C             K  K         --------------
+    # -----------------------  FFFFF        U       U       C             K K K        --------------
+    # -----------------------  F             U     U         C     C      K     K      --------------
+    # -----------------------  F              UUUU            CCCCC       K       K    --------------
+    # -----------------------------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------------------------
+
+
     nodes = bpy.context.scene.node_tree.nodes
     x_multiplier = 300
     y_multiplier = -680
@@ -828,7 +873,7 @@ class generate_render_nodes(bpy.types.Operator):
 
 
       # read if render layer is shadow/AO/height/normal/...
-      print('RenderLayer name:',render_layer_name)
+      print('L876: RenderLayer name:',render_layer_name)
       # remove the shadow/AO/height/normal/... identifier and  get a base_name (add scene name)
       preview_group_name = bpy.context.scene.name + '_' + render_layer_name
       if render_layer_is_shadow == True:
@@ -994,7 +1039,7 @@ class generate_render_nodes(bpy.types.Operator):
         insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
 
       print('-> Finished processing', render_layer_name)
-      print('----------')
+      print('---------------------------------------------')
 
     return {'FINISHED'}
 
