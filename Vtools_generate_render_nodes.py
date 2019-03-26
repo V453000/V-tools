@@ -130,14 +130,17 @@ class generate_render_nodes(bpy.types.Operator):
 
   def execute(self, context):
     
-    def insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name):
+    def insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow):
       for link in output_node.inputs[0].links:
         average_node_location = ( link.from_node.location + link.to_node.location ) /2
         resizer_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeGroup')
         resizer_node.node_tree = bpy.data.node_groups['ResizeShitter']
         resizer_node.name = output_node.name + '-ResizeShitter'
         resizer_node.label = resizer_node.name
-        resizer_node.location = average_node_location
+        if render_layer_is_shadow == False:
+          resizer_node.location = average_node_location
+        else:
+          resizer_node.location = (link.from_node.location[0], average_node_location[1])
         resizer_node.width = node_width
 
         bpy.context.scene.node_tree.links.new(link.from_socket, resizer_node.inputs[0])
@@ -864,11 +867,13 @@ class generate_render_nodes(bpy.types.Operator):
         bpy.context.scene.node_tree.links.new(preview_shitter_node.outputs[0], preview_shitter_output_node.inputs[0])
         # add resizer
         if self.resizer_use == True:
-          insert_resizer(preview_shitter_output_node, x_multiplier, output_folder, render_layer_name, preview_group_name)
+          insert_resizer(preview_shitter_output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
 
         x_count +=-2
       else:
-        preview_shitter_node = nodes[preview_group_name]
+        if self.previewer_use == True:
+          if nodes.get(preview_group_name) is not None:
+            preview_shitter_node = nodes[preview_group_name]
 
 
 
@@ -929,10 +934,11 @@ class generate_render_nodes(bpy.types.Operator):
         shadow_shitter.node_tree = bpy.data.node_groups['ShadowShitter']
         #bpy.context.scene.node_tree.links.new(input_node.outputs[3], output_node.inputs[0])
         x_count += 1
-        y_count -= 0.5
-        shadow_shitter.location = (x_count*x_multiplier, y_count*y_multiplier)
+        y_count -= 0.50
+        shadow_shitter.location = (x_count*x_multiplier-300, y_count*y_multiplier+16)
+        shadow_shitter.width = x_multiplier-30
         x_count -= 1
-        y_count += 0.5
+        y_count += 0.50
 
         index_shadow = input_node.outputs.find('Shadow')
         
@@ -940,7 +946,7 @@ class generate_render_nodes(bpy.types.Operator):
         bpy.context.scene.node_tree.links.new(shadow_shitter.outputs[0], output_node.inputs[0])
         # add resizer
         if self.resizer_use == True:
-          insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name)
+          insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
 
         continue
 
@@ -949,7 +955,7 @@ class generate_render_nodes(bpy.types.Operator):
         bpy.context.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
         # add resizer
         if self.resizer_use == True:
-          insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name)
+          insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
 
         # connect to output_node_AO
         #output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_')
@@ -957,7 +963,7 @@ class generate_render_nodes(bpy.types.Operator):
         bpy.context.scene.node_tree.links.new(input_node.outputs[index_AO], output_node_AO.inputs[0])
         # add resizer
         if self.resizer_use == True:
-          insert_resizer(output_node_AO, x_multiplier, output_folder, render_layer_name, preview_group_name)
+          insert_resizer(output_node_AO, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
 
         continue
 
@@ -967,7 +973,7 @@ class generate_render_nodes(bpy.types.Operator):
      
       # add resizer
       if self.resizer_use == True:
-        insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name)
+        insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
 
       print('-> Finished processing', render_layer_name)
       print('----------')
