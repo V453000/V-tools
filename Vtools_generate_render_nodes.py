@@ -151,6 +151,15 @@ class generate_render_nodes(bpy.types.Operator):
         half_resolution =    str(int(bpy.context.scene.render.resolution_x * bpy.context.scene.render.resolution_percentage)/2/100)[:-2]
         quarter_resolution = str(int(bpy.context.scene.render.resolution_x * bpy.context.scene.render.resolution_percentage)/4/100)[:-2]
 
+        output_base_path = output_node.base_path
+        output_base_path_first_half = output_base_path.split('\\')[0]
+        output_base_path_second_half = ''
+        i = 0
+        for segment_count in output_base_path.split('\\'):
+          i+=1
+        if i > 1:
+          output_base_path_second_half = '\\' + output_base_path.split('\\')[1]
+
         half_output_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeOutputFile')
         half_output_node.name = output_node.name + '-50%-output'
         half_output_node.label = half_output_node.name
@@ -159,8 +168,12 @@ class generate_render_nodes(bpy.types.Operator):
           half_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + half_resolution
           half_output_node.file_slots.new(preview_group_name + 'PREVIEW' + '_' + full_resolution + 'to' + half_resolution + '_')
         else:
-          half_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + half_resolution + '\\' + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name
+          #half_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + half_resolution + '\\' + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name
+          half_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + half_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name
           half_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_' + full_resolution + 'to' + half_resolution + '_')
+          if render_layer_is_AO == True:
+            half_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + half_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name + '-AO'
+            half_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_' + full_resolution + 'to' + half_resolution + '_')
         half_output_node.location = (output_node.location[0], output_node.location[1]-100)
         half_output_node.width = x_multiplier-30+150
 
@@ -172,8 +185,11 @@ class generate_render_nodes(bpy.types.Operator):
           quarter_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + quarter_resolution
           quarter_output_node.file_slots.new(preview_group_name + 'PREVIEW' + '_' + full_resolution + 'to' + quarter_resolution + '_')
         else:
-          quarter_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + quarter_resolution + '\\' + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name
+          quarter_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + quarter_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name
           quarter_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_' + full_resolution + 'to' + quarter_resolution + '_')
+          if render_layer_is_AO == True:
+            quarter_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + quarter_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name + '-AO'
+            quarter_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_' + full_resolution + 'to' + quarter_resolution + '_')
         quarter_output_node.location = (half_output_node.location[0], half_output_node.location[1]-100)
         quarter_output_node.width = x_multiplier-30+150
 
