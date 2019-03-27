@@ -208,8 +208,8 @@ class generate_render_nodes(bpy.types.Operator):
 
         # handle PreviewShitter outputs for FOLDER (base_path)
         if link.from_node.name[-14:] == 'PreviewShitter':
-          resizer_output_base_path_half    = '//OUTPUT-PREVIEW'
-          resizer_output_base_path_quarter = '//OUTPUT-PREVIEW'
+          resizer_output_base_path_half    = '//OUTPUT_PREVIEW'
+          resizer_output_base_path_quarter = '//OUTPUT_PREVIEW'
         else:
           resizer_output_base_path_half    = output_base_path_first_half + '_' + to_half_res    + output_base_path_second_half + '/' + bpy.context.scene.name +  output_render_layer_name
           resizer_output_base_path_quarter = output_base_path_first_half + '_' + to_quarter_res + output_base_path_second_half + '/' + bpy.context.scene.name +  output_render_layer_name
@@ -947,7 +947,7 @@ class generate_render_nodes(bpy.types.Operator):
         preview_shitter_output_node.label = preview_shitter_output_node.name
         preview_shitter_output_node.width = x_multiplier-30+150
 
-        preview_shitter_output_node.base_path = output_folder[:-1] + '-PREVIEW'
+        preview_shitter_output_node.base_path = output_folder[:-1] + '_PREVIEW'
         # remove output node default input socket
         preview_shitter_output_node.file_slots.remove(preview_shitter_output_node.inputs[0])
         # add output node input socket
