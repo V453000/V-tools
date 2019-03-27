@@ -140,6 +140,7 @@ class generate_render_nodes(bpy.types.Operator):
     
     def log(text):
       # write into log file
+      ''' Logging only for debug usage.
       if bpy.path.abspath('//') != '':
         full_filename = bpy.path.basename(bpy.context.blend_data.filepath)
         folder_name = '//' + os.path.dirname(full_filename)
@@ -149,6 +150,7 @@ class generate_render_nodes(bpy.types.Operator):
           file.write('\n')
       else:
         self.report({'ERROR'}, 'Save the .blend file first before outputting to a log.')
+      '''
       print(text)
 
     def insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow):
@@ -832,7 +834,6 @@ class generate_render_nodes(bpy.types.Operator):
     y_multiplier = -680
     y_count = 0
     for render_layer_name in render_layer_list:
-      log('MAJOR SHIT'+render_layer_name)
       x_count = 0
 
       render_layer_is_AO = False
@@ -898,7 +899,7 @@ class generate_render_nodes(bpy.types.Operator):
 
 
       # read if render layer is shadow/AO/height/normal/...
-      log('L876: RenderLayer name: ' + render_layer_name)
+      log('Processing: ' + render_layer_name)
       # remove the shadow/AO/height/normal/... identifier and  get a base_name (add scene name)
       preview_group_name = bpy.context.scene.name + '_' + render_layer_name
       if render_layer_is_shadow == True:
