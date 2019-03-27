@@ -18,10 +18,15 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
     ],
    default = '50% & 25%'
   )
-  previewer_use = bpy.props.BoolProperty(
+  previewer_use = bpy.props.EnumProperty(
     name = 'Use Previewer',
     description = 'Choose whether PreviewShitter attempts to combine render passes into a render preview.',
-    default = True
+    items = [
+      #identifier   #name       #desc  #icon             #ID
+      ('OFF'      , 'OFF'      ,'' , 'VISIBLE_IPO_ON'  , 0),
+      ('ON'       , 'ON'       ,'' , 'VISIBLE_IPO_OFF' , 1)
+    ],
+    default = 'ON'
   )
 
   AO_identifier_use = bpy.props.BoolProperty(

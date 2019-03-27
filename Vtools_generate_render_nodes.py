@@ -23,10 +23,15 @@ class generate_render_nodes(bpy.types.Operator):
     ],
     default = 'OFF'
   )
-  previewer_use = bpy.props.BoolProperty(
+  previewer_use = bpy.props.EnumProperty(
     name = 'Use Previewer',
     description = 'Choose whether PreviewShitter attempts to combine render passes into a render preview.',
-    default = False
+    items = [
+      #identifier   #name       #desc  #icon             #ID
+      ('OFF'      , 'OFF'      ,'' , 'VISIBLE_IPO_ON'  , 0),
+      ('ON'       , 'ON'       ,'' , 'VISIBLE_IPO_OFF' , 1)
+    ],
+    default = 'OFF'
   )
 
   AO_identifier_use = bpy.props.BoolProperty(
@@ -944,7 +949,7 @@ class generate_render_nodes(bpy.types.Operator):
       preview_shitter_node_name = preview_group_name+'PreviewShitter'
       if nodes.get(preview_shitter_node_name) is not None:
         preview_shitter_node = nodes[preview_shitter_node_name]
-      elif nodes.get(preview_shitter_node_name) is None and self.previewer_use == True:
+      elif nodes.get(preview_shitter_node_name) is None and self.previewer_use == 'ON':
         log('Adding ' + preview_shitter_node_name)
         preview_shitter_node = nodes.new('CompositorNodeGroup')
         preview_shitter_node.node_tree = bpy.data.node_groups['PreviewShitter']
@@ -972,7 +977,7 @@ class generate_render_nodes(bpy.types.Operator):
 
         x_count +=-2
       else:
-        if self.previewer_use == True:
+        if self.previewer_use == 'ON':
           if nodes.get(preview_group_name) is not None:
             preview_shitter_node = nodes[preview_group_name]
 
@@ -1014,7 +1019,7 @@ class generate_render_nodes(bpy.types.Operator):
       output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '_')
 
 
-      if self.previewer_use == True:
+      if self.previewer_use == 'ON':
         if render_layer_is_AO:
           bpy.context.scene.node_tree.links.new(input_node.outputs[0], preview_shitter_node.inputs['main'])
           index_AO = input_node.outputs.find('AO')
