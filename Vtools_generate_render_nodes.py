@@ -1,4 +1,8 @@
 import bpy
+import os
+import collections
+
+LinkList = collections.namedtuple('LinkList', ['from_node', 'to_node', 'from_socket', 'to_socket'])
 
 class generate_render_nodes(bpy.types.Operator):
   '''Generate Render Nodes from RenderLayers.'''
@@ -130,8 +134,28 @@ class generate_render_nodes(bpy.types.Operator):
 
   def execute(self, context):
     
+    log_filename = 'C:/Users/GFX-V/Desktop/log.txt'
+    # erase log file first
+    with open(log_filename, 'w'): pass
+    
+    def log(text):
+      # write into log file
+      if bpy.path.abspath('//') != '':
+        full_filename = bpy.path.basename(bpy.context.blend_data.filepath)
+        folder_name = '//' + os.path.dirname(full_filename)
+        log_path = os.path.join(folder_name, log_filename)
+        with open(log_filename, 'a') as file:
+          file.write(text)
+          file.write('\n')
+      else:
+        self.report({'ERROR'}, 'Save the .blend file first before outputting to a log.')
+      print(text)
+
     def insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow):
+      link_list = []
       for link in output_node.inputs[0].links:
+        link_list.append(LinkList(link.from_node, link.to_node, link.from_socket, link.to_socket))
+      for link in link_list:
         average_node_location = ( link.from_node.location + link.to_node.location ) /2
         resizer_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeGroup')
         resizer_node.node_tree = bpy.data.node_groups['ResizeShitter']
@@ -175,9 +199,9 @@ class generate_render_nodes(bpy.types.Operator):
 
         # handle AO
         output_render_layer_name = render_layer_name
-        print('input socket name is...', link.from_socket.name)
+        log('input socket name is...' + link.from_socket.name)
         if link.from_socket.name == 'AO':
-          print('INPUT SOCKET IS AOOOOOOO')
+          log('INPUT SOCKET IS AOOOOOOO')
           output_render_layer_name = output_render_layer_name + '-AO'
 
         # handle PreviewShitter outputs for FOLDER (base_path)
@@ -225,9 +249,9 @@ class generate_render_nodes(bpy.types.Operator):
         bpy.context.scene.node_tree.links.new(resizer_node.outputs[1], half_output_node.inputs[0])
         bpy.context.scene.node_tree.links.new(resizer_node.outputs[2], quarter_output_node.inputs[0])
 
-    print('----------------------------------------------')
-    print('   G E N E R A T E   R E N D E R    N O D E S ')
-    print('----------------------------------------------')
+    log('----------------------------------------------')
+    log('   G E N E R A T E   R E N D E R    N O D E S ')
+    log('----------------------------------------------')
 
     # ------------------------------------------------------------------------
     # VARIABLES
@@ -258,9 +282,9 @@ class generate_render_nodes(bpy.types.Operator):
     for render_layer in bpy.context.scene.render.layers:
       render_layer_list.append(render_layer.name)
 
-    print('Detected RenderLayers:')
+    log('Detected RenderLayers:')
     for render_layer_name in render_layer_list:
-      print('  ',render_layer_name)
+      log('  ' + render_layer_name)
 
 
 
@@ -276,7 +300,7 @@ class generate_render_nodes(bpy.types.Operator):
     # check if HEIGHT material exists, if not, create it
     if bpy.data.materials.get('HEIGHT') is None:
       # create new HEIGHT material
-      print('HEIGHT material does not exist, creating...')
+      log('HEIGHT material does not exist, creating...')
       height_mtl = bpy.data.materials.new('HEIGHT')
       height_mtl.use_nodes = True
       height_nodes = height_mtl.node_tree.nodes
@@ -424,7 +448,7 @@ class generate_render_nodes(bpy.types.Operator):
     # check if ShadowShitter exists, if not, create it
     nodes = bpy.context.scene.node_tree.nodes
     if bpy.data.node_groups.get('ShadowShitter') is None:
-      print('ShadowShitter does not exist, creating...')
+      log('ShadowShitter does not exist, creating...')
       shadow_shitter = bpy.data.node_groups.new(type = 'CompositorNodeTree', name = 'ShadowShitter')
 
       shadow_shitter.inputs.new('NodeSocketFloat', 'Shadow Pass')
@@ -477,7 +501,7 @@ class generate_render_nodes(bpy.types.Operator):
     node_width = 270
 
     if bpy.data.node_groups.get('PreviewShitter') is None:
-      print('PreviewShitter does not exist, creating...')
+      log('PreviewShitter does not exist, creating...')
       preview_shitter = bpy.data.node_groups.new(type = 'CompositorNodeTree', name = 'PreviewShitter')
 
       preview_shitter.inputs.new('NodeSocketFloat', 'main')
@@ -808,6 +832,7 @@ class generate_render_nodes(bpy.types.Operator):
     y_multiplier = -680
     y_count = 0
     for render_layer_name in render_layer_list:
+      log('MAJOR SHIT'+render_layer_name)
       x_count = 0
 
       render_layer_is_AO = False
@@ -873,7 +898,7 @@ class generate_render_nodes(bpy.types.Operator):
 
 
       # read if render layer is shadow/AO/height/normal/...
-      print('L876: RenderLayer name:',render_layer_name)
+      log('L876: RenderLayer name: ' + render_layer_name)
       # remove the shadow/AO/height/normal/... identifier and  get a base_name (add scene name)
       preview_group_name = bpy.context.scene.name + '_' + render_layer_name
       if render_layer_is_shadow == True:
@@ -881,33 +906,33 @@ class generate_render_nodes(bpy.types.Operator):
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[:-appendix_shadow_char_count]
         elif self.shadow_identifier_position == 'front':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[appendix_shadow_char_count:]
-        print('...layer identified as shadow')
+        log('...layer identified as shadow')
 
       elif render_layer_is_AO == True:
         if self.AO_identifier_position == 'back':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[:-appendix_AO_char_count]
         elif self.AO_identifier_position == 'front':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[appendix_AO_char_count:]
-        print('...layer identified as AO')
+        log('...layer identified as AO')
       elif render_layer_is_height == True:
         if self.height_identifier_position == 'back':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[:-appendix_height_char_count]
         elif self.height_identifier_position == 'front':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[appendix_height_char_count:]
-        print('...layer identified as height')
+        log('...layer identified as height')
       elif render_layer_is_normal == True:
         if self.normal_identifier_position == 'back':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[:-appendix_normal_char_count]
         elif self.normal_identifier_position == 'front':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[appendix_normal_char_count:]
-        print('...layer identified as normal')
+        log('...layer identified as normal')
 
       # create a Preview shitter group for base_name if it does not yet exist
       preview_shitter_node_name = preview_group_name+'PreviewShitter'
       if nodes.get(preview_shitter_node_name) is not None:
         preview_shitter_node = nodes[preview_shitter_node_name]
       elif nodes.get(preview_shitter_node_name) is None and self.previewer_use == True:
-        print('Adding', preview_shitter_node_name)
+        log('Adding ' + preview_shitter_node_name)
         preview_shitter_node = nodes.new('CompositorNodeGroup')
         preview_shitter_node.node_tree = bpy.data.node_groups['PreviewShitter']
         preview_shitter_node.name = preview_shitter_node_name
@@ -1010,7 +1035,8 @@ class generate_render_nodes(bpy.types.Operator):
         # add resizer
         if self.resizer_use == True:
           insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
-
+        log('-> Finished processing ' + render_layer_name)
+        log('---------------------------------------------')
         continue
 
       # exception to add AO pass
@@ -1027,7 +1053,8 @@ class generate_render_nodes(bpy.types.Operator):
         # add resizer
         if self.resizer_use == True:
           insert_resizer(output_node_AO, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
-
+        log('-> Finished processing ' + render_layer_name)
+        log('---------------------------------------------')
         continue
 
 
@@ -1038,8 +1065,8 @@ class generate_render_nodes(bpy.types.Operator):
       if self.resizer_use == True:
         insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
 
-      print('-> Finished processing', render_layer_name)
-      print('---------------------------------------------')
+      log('-> Finished processing ' + render_layer_name)
+      log('---------------------------------------------')
 
     return {'FINISHED'}
 
