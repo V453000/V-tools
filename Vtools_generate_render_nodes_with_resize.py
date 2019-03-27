@@ -29,18 +29,16 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
     default = 'ON'
   )
 
-  AO_identifier_use = bpy.props.BoolProperty(
+  AO_identifier_use = bpy.props.EnumProperty(
     name = 'Use AO',
     description = 'Save AO pass from specified RenderLayers to individual folder.',
-    default = True
-  )
-  AO_identifier_position = bpy.props.EnumProperty(
-    name = 'AO Identifier position',
-    description = 'Select where in the RenderLayer name is the AO identifier.',
     items = [
-      ('back', 'back',''),
-      ('front', 'front','')
-    ]
+      #identifier   #name       #desc  #icon             #ID
+      ('OFF'      , 'OFF'       ,'' , 'PANEL_CLOSE'     , 0),
+      ('Back'     , 'Back'      ,'' , 'FORWARD'         , 1),
+      ('Front'    , 'Front'     ,'' , 'BACK'            , 2)
+    ],
+   default = 'Back'
   )
   AO_identifier = bpy.props.StringProperty(
     name = 'AO Identifier',
@@ -49,18 +47,16 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
   )
 
 
-  shadow_identifier_use = bpy.props.BoolProperty(
+  shadow_identifier_use = bpy.props.EnumProperty(
     name = 'Use Shadow',
     description = 'Save Shadow pass from specified RenderLayers to individual folder.',
-    default = True
-  )
-  shadow_identifier_position = bpy.props.EnumProperty(
-    name = 'Shadow Identifier position',
-    description = 'Select where in the RenderLayer name is the Shadow identifier.',
     items = [
-      ('back', 'back',''),
-      ('front', 'front','')
-    ]
+      #identifier   #name       #desc  #icon             #ID
+      ('OFF'      , 'OFF'       ,'' , 'PANEL_CLOSE'     , 0),
+      ('Back'     , 'Back'      ,'' , 'FORWARD'         , 1),
+      ('Front'    , 'Front'     ,'' , 'BACK'            , 2)
+    ],
+   default = 'Back'
   )
   shadow_identifier = bpy.props.StringProperty(
     name = 'Shadow Identifier',
@@ -69,18 +65,16 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
   )
   
 
-  height_identifier_use = bpy.props.BoolProperty(
+  height_identifier_use = bpy.props.EnumProperty(
     name = 'Use Height',
     description = 'Save Height pass from specified RenderLayers to individual folder.',
-    default = True
-  )
-  height_identifier_position = bpy.props.EnumProperty(
-    name = 'Height Identifier position',
-    description = 'Select where in the RenderLayer name is the Height identifier.',
     items = [
-      ('back', 'back',''),
-      ('front', 'front','')
-    ]
+      #identifier   #name       #desc  #icon             #ID
+      ('OFF'      , 'OFF'       ,'' , 'PANEL_CLOSE'     , 0),
+      ('Back'     , 'Back'      ,'' , 'FORWARD'         , 1),
+      ('Front'    , 'Front'     ,'' , 'BACK'            , 2)
+    ],
+   default = 'Back'
   )
   height_identifier = bpy.props.StringProperty(
     name = 'Height Identifier',
@@ -88,18 +82,16 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
     default = 'height'
   )
 
-  normal_identifier_use = bpy.props.BoolProperty(
+  normal_identifier_use = bpy.props.EnumProperty(
     name = 'Use Z-Normal',
     description = 'Save Z-Normal pass from specified RenderLayers to individual folder.',
-    default = True
-  )
-  normal_identifier_position = bpy.props.EnumProperty(
-    name = 'Z-Normal Identifier position',
-    description = 'Select where in the RenderLayer name is the Z-Normal identifier.',
     items = [
-      ('back', 'back',''),
-      ('front', 'front','')
-    ]
+      #identifier   #name       #desc  #icon             #ID
+      ('OFF'      , 'OFF'       ,'' , 'PANEL_CLOSE'     , 0),
+      ('Back'     , 'Back'      ,'' , 'FORWARD'         , 1),
+      ('Front'    , 'Front'     ,'' , 'BACK'            , 2)
+    ],
+   default = 'Back'
   )
   normal_identifier = bpy.props.StringProperty(
     name = 'Z-Normal Identifier',
@@ -136,23 +128,19 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
     name = 'Regenerate Z-NORMAL',
     description = 'Delete the nodes in current Z-NORMAL material and create new ones.',
     default = False
-  )  
+  )
 
   def execute(self, context):
     bpy.ops.nodes.generate_render_nodes(
       resizer_use = self.resizer_use,
       previewer_use = self.previewer_use,
       AO_identifier_use = self.AO_identifier_use,
-      AO_identifier_position = self.AO_identifier_position,
       AO_identifier = self.AO_identifier,
       shadow_identifier_use = self.shadow_identifier_use,
-      shadow_identifier_position = self.shadow_identifier_position,
       shadow_identifier = self.shadow_identifier,
       height_identifier_use = self.height_identifier_use,
-      height_identifier_position = self.height_identifier_position,
       height_identifier = self.height_identifier,
       normal_identifier_use = self.height_identifier_use,
-      normal_identifier_position = self.normal_identifier_position,
       normal_identifier = self.normal_identifier,
       remove_existing_nodes = self.remove_existing_nodes,
       regenerate_shadow_shitter = self.regenerate_shadow_shitter,

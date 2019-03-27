@@ -34,18 +34,16 @@ class generate_render_nodes(bpy.types.Operator):
     default = 'OFF'
   )
 
-  AO_identifier_use = bpy.props.BoolProperty(
+  AO_identifier_use = bpy.props.EnumProperty(
     name = 'Use AO',
     description = 'Save AO pass from specified RenderLayers to individual folder.',
-    default = True
-  )
-  AO_identifier_position = bpy.props.EnumProperty(
-    name = 'AO Identifier position',
-    description = 'Select where in the RenderLayer name is the AO identifier.',
     items = [
-      ('back', 'back',''),
-      ('front', 'front','')
-    ]
+      #identifier   #name       #desc  #icon             #ID
+      ('OFF'      , 'OFF'       ,'' , 'PANEL_CLOSE'     , 0),
+      ('Back'     , 'Back'      ,'' , 'FORWARD'         , 1),
+      ('Front'    , 'Front'     ,'' , 'BACK'            , 2)
+    ],
+   default = 'Back'
   )
   AO_identifier = bpy.props.StringProperty(
     name = 'AO Identifier',
@@ -54,18 +52,16 @@ class generate_render_nodes(bpy.types.Operator):
   )
 
 
-  shadow_identifier_use = bpy.props.BoolProperty(
+  shadow_identifier_use = bpy.props.EnumProperty(
     name = 'Use Shadow',
     description = 'Save Shadow pass from specified RenderLayers to individual folder.',
-    default = True
-  )
-  shadow_identifier_position = bpy.props.EnumProperty(
-    name = 'Shadow Identifier position',
-    description = 'Select where in the RenderLayer name is the Shadow identifier.',
     items = [
-      ('back', 'back',''),
-      ('front', 'front','')
-    ]
+      #identifier   #name       #desc  #icon             #ID
+      ('OFF'      , 'OFF'       ,'' , 'PANEL_CLOSE'     , 0),
+      ('Back'     , 'Back'      ,'' , 'FORWARD'         , 1),
+      ('Front'    , 'Front'     ,'' , 'BACK'            , 2)
+    ],
+   default = 'Back'
   )
   shadow_identifier = bpy.props.StringProperty(
     name = 'Shadow Identifier',
@@ -74,18 +70,16 @@ class generate_render_nodes(bpy.types.Operator):
   )
   
 
-  height_identifier_use = bpy.props.BoolProperty(
+  height_identifier_use = bpy.props.EnumProperty(
     name = 'Use Height',
     description = 'Save Height pass from specified RenderLayers to individual folder.',
-    default = True
-  )
-  height_identifier_position = bpy.props.EnumProperty(
-    name = 'Height Identifier position',
-    description = 'Select where in the RenderLayer name is the Height identifier.',
     items = [
-      ('back', 'back',''),
-      ('front', 'front','')
-    ]
+      #identifier   #name       #desc  #icon             #ID
+      ('OFF'      , 'OFF'       ,'' , 'PANEL_CLOSE'     , 0),
+      ('Back'     , 'Back'      ,'' , 'FORWARD'         , 1),
+      ('Front'    , 'Front'     ,'' , 'BACK'            , 2)
+    ],
+   default = 'Back'
   )
   height_identifier = bpy.props.StringProperty(
     name = 'Height Identifier',
@@ -93,18 +87,16 @@ class generate_render_nodes(bpy.types.Operator):
     default = 'height'
   )
 
-  normal_identifier_use = bpy.props.BoolProperty(
+  normal_identifier_use = bpy.props.EnumProperty(
     name = 'Use Z-Normal',
     description = 'Save Z-Normal pass from specified RenderLayers to individual folder.',
-    default = True
-  )
-  normal_identifier_position = bpy.props.EnumProperty(
-    name = 'Z-Normal Identifier position',
-    description = 'Select where in the RenderLayer name is the Z-Normal identifier.',
     items = [
-      ('back', 'back',''),
-      ('front', 'front','')
-    ]
+      #identifier   #name       #desc  #icon             #ID
+      ('OFF'      , 'OFF'       ,'' , 'PANEL_CLOSE'     , 0),
+      ('Back'     , 'Back'      ,'' , 'FORWARD'         , 1),
+      ('Front'    , 'Front'     ,'' , 'BACK'            , 2)
+    ],
+   default = 'Back'
   )
   normal_identifier = bpy.props.StringProperty(
     name = 'Z-Normal Identifier',
@@ -141,7 +133,7 @@ class generate_render_nodes(bpy.types.Operator):
     name = 'Regenerate Z-NORMAL',
     description = 'Delete the nodes in current Z-NORMAL material and create new ones.',
     default = False
-  )  
+  )
 
   def execute(self, context):
     
@@ -422,24 +414,24 @@ class generate_render_nodes(bpy.types.Operator):
     for render_layer in bpy.context.scene.render.layers:
       render_layer_name = render_layer.name
       
-      if self.AO_identifier_position == 'back':
+      if self.AO_identifier_use == 'Back':
         render_layer_appendix_AO = render_layer_name[-appendix_AO_char_count:]
-      if self.AO_identifier_position == 'front':
+      if self.AO_identifier_use == 'Front':
         render_layer_appendix_AO = render_layer_name[:appendix_AO_char_count]
 
-      if self.shadow_identifier_position == 'back':
+      if self.shadow_identifier_use == 'Back':
         render_layer_appendix_shadow = render_layer_name[-appendix_shadow_char_count:]
-      if self.shadow_identifier_position == 'front':
+      if self.shadow_identifier_use == 'Front':
         render_layer_appendix_shadow = render_layer_name[:appendix_shadow_char_count]
 
-      if self.height_identifier_position == 'back':
+      if self.height_identifier_use == 'Back':
         render_layer_appendix_height = render_layer_name[-appendix_height_char_count:]
-      if self.height_identifier_position == 'front':
+      if self.height_identifier_use == 'Front':
         render_layer_appendix_height = render_layer_name[:appendix_height_char_count]
       
-      if self.normal_identifier_position == 'back':
+      if self.normal_identifier_use == 'Back':
         render_layer_appendix_normal = render_layer_name[-appendix_normal_char_count:]
-      if self.normal_identifier_position == 'front':
+      if self.normal_identifier_use == 'Front':
         render_layer_appendix_normal = render_layer_name[:appendix_normal_char_count]
 
 
@@ -861,9 +853,9 @@ class generate_render_nodes(bpy.types.Operator):
 
       # filter AO identifier
       appendix_AO_char_count = len(appendix_AO)
-      if self.AO_identifier_position == 'back':
+      if self.AO_identifier_use == 'Back':
         node_appendix_AO = render_layer_name[-appendix_AO_char_count:]
-      if self.AO_identifier_position == 'front':
+      if self.AO_identifier_use == 'Front':
         node_appendix_AO = render_layer_name[:appendix_AO_char_count]
 
       if node_appendix_AO == appendix_AO:
@@ -871,9 +863,9 @@ class generate_render_nodes(bpy.types.Operator):
 
       # filter shadow identifier
       appendix_shadow_char_count = len(appendix_shadow)
-      if self.shadow_identifier_position == 'back':
+      if self.shadow_identifier_use == 'Back':
         node_appendix_shadow = render_layer_name[-appendix_shadow_char_count:]
-      if self.shadow_identifier_position == 'front':
+      if self.shadow_identifier_use == 'Front':
         node_appendix_shadow = render_layer_name[:appendix_shadow_char_count]
 
       if node_appendix_shadow == appendix_shadow:
@@ -881,9 +873,9 @@ class generate_render_nodes(bpy.types.Operator):
 
       # filter normal identifier
       appendix_normal_char_count = len(appendix_normal)
-      if self.normal_identifier_position == 'back':
+      if self.normal_identifier_use == 'Back':
         node_appendix_normal = render_layer_name[-appendix_normal_char_count:]
-      if self.normal_identifier_position == 'front':
+      if self.normal_identifier_use == 'Front':
         node_appendix_normal = render_layer_name[:appendix_normal_char_count]
 
       if node_appendix_normal == appendix_normal:
@@ -891,9 +883,9 @@ class generate_render_nodes(bpy.types.Operator):
 
       # filter height identifier
       appendix_height_char_count = len(appendix_height)
-      if self.height_identifier_position == 'back':
+      if self.height_identifier_use == 'Back':
         node_appendix_height = render_layer_name[-appendix_height_char_count:]
-      if self.height_identifier_position == 'front':
+      if self.height_identifier_use == 'Front':
         node_appendix_height = render_layer_name[:appendix_height_char_count]
 
       if node_appendix_height == appendix_height:
@@ -920,28 +912,28 @@ class generate_render_nodes(bpy.types.Operator):
       # remove the shadow/AO/height/normal/... identifier and  get a base_name (add scene name)
       preview_group_name = bpy.context.scene.name + '_' + render_layer_name
       if render_layer_is_shadow == True:
-        if self.shadow_identifier_position == 'back':
+        if self.shadow_identifier_use == 'Back':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[:-appendix_shadow_char_count]
-        elif self.shadow_identifier_position == 'front':
+        elif self.shadow_identifier_use == 'Front':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[appendix_shadow_char_count:]
         log('...layer identified as shadow')
 
       elif render_layer_is_AO == True:
-        if self.AO_identifier_position == 'back':
+        if self.AO_identifier_use == 'Back':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[:-appendix_AO_char_count]
-        elif self.AO_identifier_position == 'front':
+        elif self.AO_identifier_use == 'Front':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[appendix_AO_char_count:]
         log('...layer identified as AO')
       elif render_layer_is_height == True:
-        if self.height_identifier_position == 'back':
+        if self.height_identifier_use == 'Back':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[:-appendix_height_char_count]
-        elif self.height_identifier_position == 'front':
+        elif self.height_identifier_use == 'Front':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[appendix_height_char_count:]
         log('...layer identified as height')
       elif render_layer_is_normal == True:
-        if self.normal_identifier_position == 'back':
+        if self.normal_identifier_use == 'Back':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[:-appendix_normal_char_count]
-        elif self.normal_identifier_position == 'front':
+        elif self.normal_identifier_use == 'Front':
           preview_group_name = bpy.context.scene.name + '_' + render_layer_name[appendix_normal_char_count:]
         log('...layer identified as normal')
 
@@ -998,7 +990,7 @@ class generate_render_nodes(bpy.types.Operator):
       output_node.base_path = output_folder + bpy.context.scene.name + '\\' + bpy.context.scene.name + '_' + render_layer_name
 
       # create extra output node for AO
-      if render_layer_is_AO == True and self.AO_identifier_use == True:
+      if render_layer_is_AO == True and self.AO_identifier_use != 'OFF':
         output_node_AO = nodes.new('CompositorNodeOutputFile')
         output_node_AO.location = (x_count*x_multiplier, y_count*y_multiplier - 140 - 180)
         output_node_AO.name = 'file-output-' + render_layer_name + '-AO'
@@ -1035,7 +1027,7 @@ class generate_render_nodes(bpy.types.Operator):
           bpy.context.scene.node_tree.links.new(input_node.outputs[0], preview_shitter_node.inputs['main'])
 
       # exception to change to shadow pass
-      if render_layer_is_shadow == True and self.shadow_identifier_use == True:
+      if render_layer_is_shadow == True and self.shadow_identifier_use != 'OFF':
         shadow_shitter = nodes.new('CompositorNodeGroup')
         shadow_shitter.node_tree = bpy.data.node_groups['ShadowShitter']
         #bpy.context.scene.node_tree.links.new(input_node.outputs[3], output_node.inputs[0])
@@ -1058,7 +1050,7 @@ class generate_render_nodes(bpy.types.Operator):
         continue
 
       # exception to add AO pass
-      if render_layer_is_AO == True and self.AO_identifier_use == True:
+      if render_layer_is_AO == True and self.AO_identifier_use != 'OFF':
         bpy.context.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
         # add resizer
         if self.resizer_use != 'OFF':
