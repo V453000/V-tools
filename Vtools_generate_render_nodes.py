@@ -12,10 +12,16 @@ class generate_render_nodes(bpy.types.Operator):
 
 
 
-  resizer_use = bpy.props.BoolProperty(
-    name = 'Use Resizer',
+  resizer_use = bpy.props.EnumProperty(
+    name = 'Resizer',
     description = 'Choose whether ResizeShitter automatically downscales the outputs.',
-    default = False
+    items = [
+      #identifier   #name       #desc  #icon             #ID
+      ('OFF'      , 'OFF'       ,'' , 'PANEL_CLOSE'     , 0),
+      ('50%'      , '50%'       ,'' , 'SCENE'           , 1),
+      ('50% & 25%', '50% & 25%' ,'' , 'CAMERA_STEREO'   , 2)
+    ],
+    default = 'OFF'
   )
   previewer_use = bpy.props.BoolProperty(
     name = 'Use Previewer',
@@ -153,7 +159,7 @@ class generate_render_nodes(bpy.types.Operator):
       '''
       print(text)
 
-    def insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow):
+    def insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow, resizer_use):
       link_list = []
       for link in output_node.inputs[0].links:
         link_list.append(LinkList(link.from_node, link.to_node, link.from_socket, link.to_socket))
@@ -178,14 +184,6 @@ class generate_render_nodes(bpy.types.Operator):
         quarter_resolution = str(int(bpy.context.scene.render.resolution_x * bpy.context.scene.render.resolution_percentage)/4/100)[:-2]
         to_half_res    = full_resolution + 'to' + half_resolution
         to_quarter_res = full_resolution + 'to' + quarter_resolution
-
-        # create basic half_output node
-        half_output_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeOutputFile')
-        half_output_node.name = output_node.name + '-50%-output'
-        half_output_node.label = half_output_node.name
-        half_output_node.file_slots.remove(half_output_node.inputs[0])
-        half_output_node.location = (output_node.location[0], output_node.location[1]-100)
-        half_output_node.width = x_multiplier-30+150
 
         # find the output path for the node
         output_base_path = output_node.base_path
@@ -224,16 +222,34 @@ class generate_render_nodes(bpy.types.Operator):
         
 
         #--------------------------------------------------------------------------------------------------------
-        half_output_node.base_path = resizer_output_base_path_half
-        half_output_node.file_slots.new( output_filename_half )
-          
 
-        quarter_output_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeOutputFile')
-        quarter_output_node.name = output_node.name + '-25%-output'
-        quarter_output_node.label = quarter_output_node.name
-        quarter_output_node.file_slots.remove(quarter_output_node.inputs[0])
-        quarter_output_node.location = (half_output_node.location[0], half_output_node.location[1]-100)
-        quarter_output_node.width = x_multiplier-30+150
+        # add 50% node
+        if resizer_use == '50%' or resizer_use == '50% & 25%':
+          # create basic half_output node
+          half_output_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeOutputFile')
+          half_output_node.name = output_node.name + '-50%-output'
+          half_output_node.label = half_output_node.name
+          half_output_node.file_slots.remove(half_output_node.inputs[0])
+          half_output_node.location = (output_node.location[0], output_node.location[1]-100)
+          half_output_node.width = x_multiplier-30+150
+          half_output_node.base_path = resizer_output_base_path_half
+          half_output_node.file_slots.new( output_filename_half )
+          # link it
+          bpy.context.scene.node_tree.links.new(resizer_node.outputs[1], half_output_node.inputs[0])
+        
+        # add 25% node
+        if resizer_use == '50% & 25%':
+          quarter_output_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeOutputFile')
+          quarter_output_node.name = output_node.name + '-25%-output'
+          quarter_output_node.label = quarter_output_node.name
+          quarter_output_node.file_slots.remove(quarter_output_node.inputs[0])
+          quarter_output_node.location = (half_output_node.location[0], half_output_node.location[1]-100)
+          quarter_output_node.width = x_multiplier-30+150
+          quarter_output_node.base_path = resizer_output_base_path_quarter
+          quarter_output_node.file_slots.new( output_filename_quarter )
+          # link it
+          bpy.context.scene.node_tree.links.new(resizer_node.outputs[2], quarter_output_node.inputs[0])
+
         #if link.from_node.name[-14:] == 'PreviewShitter':
         #  quarter_output_node.base_path = output_node.base_path + '_' + full_resolution + 'to' + quarter_resolution
         #  quarter_output_node.file_slots.new(preview_group_name + 'PREVIEW' + '_' + full_resolution + 'to' + quarter_resolution + '_')
@@ -244,12 +260,8 @@ class generate_render_nodes(bpy.types.Operator):
         #  if render_layer_is_AO == True:
         #    quarter_output_node.base_path = output_base_path_first_half + '_' + full_resolution + 'to' + quarter_resolution + output_base_path_second_half + '\\' + bpy.context.scene.name + '_' + render_layer_name + '-AO'
         #    quarter_output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_' + full_resolution + 'to' + quarter_resolution + '_')
-        quarter_output_node.base_path = resizer_output_base_path_quarter
-        quarter_output_node.file_slots.new( output_filename_quarter )
 
         # link the resizer to the output nodes
-        bpy.context.scene.node_tree.links.new(resizer_node.outputs[1], half_output_node.inputs[0])
-        bpy.context.scene.node_tree.links.new(resizer_node.outputs[2], quarter_output_node.inputs[0])
 
     log('----------------------------------------------')
     log('   G E N E R A T E   R E N D E R    N O D E S ')
@@ -955,8 +967,8 @@ class generate_render_nodes(bpy.types.Operator):
 
         bpy.context.scene.node_tree.links.new(preview_shitter_node.outputs[0], preview_shitter_output_node.inputs[0])
         # add resizer
-        if self.resizer_use == True:
-          insert_resizer(preview_shitter_output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
+        if self.resizer_use != 'OFF':
+          insert_resizer(preview_shitter_output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow, self.resizer_use)
 
         x_count +=-2
       else:
@@ -1034,8 +1046,8 @@ class generate_render_nodes(bpy.types.Operator):
         bpy.context.scene.node_tree.links.new(input_node.outputs[index_shadow], shadow_shitter.inputs[0])
         bpy.context.scene.node_tree.links.new(shadow_shitter.outputs[0], output_node.inputs[0])
         # add resizer
-        if self.resizer_use == True:
-          insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
+        if self.resizer_use != 'OFF':
+          insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow, self.resizer_use)
         log('-> Finished processing ' + render_layer_name)
         log('---------------------------------------------')
         continue
@@ -1044,16 +1056,16 @@ class generate_render_nodes(bpy.types.Operator):
       if render_layer_is_AO == True and self.AO_identifier_use == True:
         bpy.context.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
         # add resizer
-        if self.resizer_use == True:
-          insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
+        if self.resizer_use != 'OFF':
+          insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow, self.resizer_use)
 
         # connect to output_node_AO
         #output_node.file_slots.new(bpy.context.scene.name + '_' + render_layer_name + '-AO' + '_')
         index_AO = input_node.outputs.find('AO')
         bpy.context.scene.node_tree.links.new(input_node.outputs[index_AO], output_node_AO.inputs[0])
         # add resizer
-        if self.resizer_use == True:
-          insert_resizer(output_node_AO, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
+        if self.resizer_use != 'OFF':
+          insert_resizer(output_node_AO, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow, self.resizer_use)
         log('-> Finished processing ' + render_layer_name)
         log('---------------------------------------------')
         continue
@@ -1063,8 +1075,8 @@ class generate_render_nodes(bpy.types.Operator):
       bpy.context.screen.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
      
       # add resizer
-      if self.resizer_use == True:
-        insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow)
+      if self.resizer_use != 'OFF':
+        insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow, self.resizer_use)
 
       log('-> Finished processing ' + render_layer_name)
       log('---------------------------------------------')

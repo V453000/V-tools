@@ -7,10 +7,16 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
   bl_options = {'REGISTER', 'UNDO'}
   
   
-  resizer_use = bpy.props.BoolProperty(
-    name = 'Use Resizer',
+  resizer_use = bpy.props.EnumProperty(
+    name = 'Resizer',
     description = 'Choose whether ResizeShitter automatically downscales the outputs.',
-    default = True
+    items = [
+      #identifier   #name       #desc  #icon             #ID
+      ('OFF'      , 'OFF'       ,'' , 'PANEL_CLOSE'     , 0),
+      ('50%'      , '50%'       ,'' , 'SCENE'           , 1),
+      ('50% & 25%', '50% & 25%' ,'' , 'CAMERA_STEREO'   , 2)
+    ],
+   default = '50% & 25%'
   )
   previewer_use = bpy.props.BoolProperty(
     name = 'Use Previewer',
