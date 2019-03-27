@@ -23,8 +23,8 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
     description = 'Choose whether PreviewShitter attempts to combine render passes into a render preview.',
     items = [
       #identifier   #name       #desc  #icon             #ID
-      ('OFF'      , 'OFF'      ,'' , 'VISIBLE_IPO_ON'  , 0),
-      ('ON'       , 'ON'       ,'' , 'VISIBLE_IPO_OFF' , 1)
+      ('OFF'      , 'OFF'      ,'' , 'PANEL_CLOSE'     , 0),
+      ('ON'       , 'ON'       ,'' , 'VISIBLE_IPO_ON'  , 1)
     ],
     default = 'ON'
   )
