@@ -29,6 +29,68 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
     default = 'ON'
   )
 
+
+  remove_existing_nodes = bpy.props.EnumProperty(
+    name = 'Remove Existing Nodes',
+    description = 'Choose whether the function should remove existing nodes, or only add new.',
+    items = [
+      #identifier   #name         #desc  #icon        #ID
+      ('Regenerate', 'Regenerate', '' ,  'CANCEL'     , 0),
+      ('Keep'      , 'Keep'      , '' ,  'FILE_TICK'  , 1)
+    ],
+    default = 'Regenerate'
+  )
+  regenerate_shadow_shitter = bpy.props.EnumProperty(
+    name = 'Regenerate Shadow Shitter',
+    description = 'Delete the nodes in current SHADOW Shitter and create new ones.',
+    items = [
+      #identifier   #name         #desc  #icon        #ID
+      ('Regenerate', 'Regenerate', '' ,  'CANCEL'     , 0),
+      ('Keep'      , 'Keep'      , '' ,  'FILE_TICK'  , 1)
+    ],
+    default = 'Keep'
+  )
+  regenerate_preview_shitter = bpy.props.EnumProperty(
+    name = 'Regenerate Preview Shitter',
+    description = 'Delete the nodes in current PREVIEW Shitter and create new ones.',
+    items = [
+      #identifier   #name         #desc  #icon        #ID
+      ('Regenerate', 'Regenerate', '' ,  'CANCEL'     , 0),
+      ('Keep'      , 'Keep'      , '' ,  'FILE_TICK'  , 1)
+    ],
+    default = 'Keep'
+  )
+  regenerate_resize_shitter = bpy.props.EnumProperty(
+    name = 'Regenerate Resize Shitter',
+    description = 'Delete the nodes in current RESIZE Shitter and create new ones.',
+    items = [
+      #identifier   #name         #desc  #icon        #ID
+      ('Regenerate', 'Regenerate', '' ,  'CANCEL'     , 0),
+      ('Keep'      , 'Keep'      , '' ,  'FILE_TICK'  , 1)
+    ],
+    default = 'Keep'
+  )
+  regenerate_height_material = bpy.props.EnumProperty(
+    name = 'Regenerate HEIGHT material',
+    description = 'Delete the nodes in current HEIGHT material and create new ones.',
+    items = [
+      #identifier   #name         #desc  #icon        #ID
+      ('Regenerate', 'Regenerate', '' ,  'CANCEL'     , 0),
+      ('Keep'      , 'Keep'      , '' ,  'FILE_TICK'  , 1)
+    ],
+    default = 'Keep'
+  )
+  regenerate_normal_material = bpy.props.EnumProperty(
+    name = 'Regenerate Z-NORMAL',
+    description = 'Delete the nodes in current Z-NORMAL material and create new ones.',
+    items = [
+      #identifier   #name         #desc  #icon        #ID
+      ('Regenerate', 'Regenerate', '' ,  'CANCEL'     , 0),
+      ('Keep'      , 'Keep'      , '' ,  'FILE_TICK'  , 1)
+    ],
+    default = 'Keep'
+  )
+
   AO_identifier_use = bpy.props.EnumProperty(
     name = 'Use AO',
     description = 'Save AO pass from specified RenderLayers to individual folder.',
@@ -45,8 +107,6 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
     description = 'Suffix or appendix in the name of RenderLayer for rendering AO.',
     default = 'main'
   )
-
-
   shadow_identifier_use = bpy.props.EnumProperty(
     name = 'Use Shadow',
     description = 'Save Shadow pass from specified RenderLayers to individual folder.',
@@ -63,8 +123,6 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
     description = 'Suffix or appendix in the name of RenderLayer for rendering Shadow.',
     default = 'shadow'
   )
-  
-
   height_identifier_use = bpy.props.EnumProperty(
     name = 'Use Height',
     description = 'Save Height pass from specified RenderLayers to individual folder.',
@@ -81,7 +139,6 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
     description = 'Suffix or appendix in the name of RenderLayer for rendering Height.',
     default = 'height'
   )
-
   normal_identifier_use = bpy.props.EnumProperty(
     name = 'Use Z-Normal',
     description = 'Save Z-Normal pass from specified RenderLayers to individual folder.',
@@ -98,38 +155,6 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
     description = 'Suffix or appendix in the name of RenderLayer for rendering Z-Normal.',
     default = 'Z-normal'
   )
-
-  remove_existing_nodes = bpy.props.BoolProperty(
-    name = 'Remove Existing Nodes',
-    description = 'Choose whether the function should remove existing nodes, or only add new.',
-    default = True
-  )
-  regenerate_shadow_shitter = bpy.props.BoolProperty(
-    name = 'Regenerate Shadow Shitter',
-    description = 'Delete the nodes in current SHADOW Shitter and create new ones.',
-    default = False
-  )  
-  regenerate_preview_shitter = bpy.props.BoolProperty(
-    name = 'Regenerate Preview Shitter',
-    description = 'Delete the nodes in current PREVIEW Shitter and create new ones.',
-    default = False
-  )
-  regenerate_resize_shitter = bpy.props.BoolProperty(
-    name = 'Regenerate Resize Shitter',
-    description = 'Delete the nodes in current RESIZE Shitter and create new ones.',
-    default = False
-  )
-  regenerate_height_material = bpy.props.BoolProperty(
-    name = 'Regenerate HEIGHT material',
-    description = 'Delete the nodes in current HEIGHT material and create new ones.',
-    default = False
-  )  
-  regenerate_normal_material = bpy.props.BoolProperty(
-    name = 'Regenerate Z-NORMAL',
-    description = 'Delete the nodes in current Z-NORMAL material and create new ones.',
-    default = False
-  )
-
   def execute(self, context):
     bpy.ops.nodes.generate_render_nodes(
       resizer_use = self.resizer_use,
