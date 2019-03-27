@@ -812,7 +812,7 @@ class generate_render_nodes(bpy.types.Operator):
       output_node = resize_shitter.nodes.new('NodeGroupOutput')
       output_node.name = 'ResizeShitter-Output'
       output_node.label = output_node.name
-      output_node.location = (200,0)
+      output_node.location = (400,0)
       
       transform_node_1 = resize_shitter.nodes.new('CompositorNodeTransform')
       transform_node_1.filter_type = 'BILINEAR'
@@ -821,19 +821,41 @@ class generate_render_nodes(bpy.types.Operator):
       transform_node_1.label = transform_node_1.name
       transform_node_1.location = (0, -50)
       
+      crop_node_1 = resize_shitter.nodes.new('CompositorNodeCrop')
+      crop_node_1.relative = True
+      crop_node_1.name = 'ResizeShitter-Crop-1'
+      crop_node_1.rel_min_x = 0.25
+      crop_node_1.rel_max_x = 0.74
+      crop_node_1.rel_min_y = 0.25
+      crop_node_1.rel_max_y = 0.74
+      crop_node_1.label = crop_node_1.name
+      crop_node_1.location = (200, -50)
+      
       transform_node_2 = resize_shitter.nodes.new('CompositorNodeTransform')
       transform_node_2.filter_type = 'BILINEAR'
       transform_node_2.inputs[4].default_value = 0.25
       transform_node_2.name = 'ResizeShitter-Transform-2'
       transform_node_2.label = transform_node_1.name
-      transform_node_2.location = (0, -250)
+      transform_node_2.location = (0, -300)
+
+      crop_node_2 = resize_shitter.nodes.new('CompositorNodeCrop')
+      crop_node_2.relative = True
+      crop_node_2.name = 'ResizeShitter-Crop-2'
+      crop_node_2.rel_min_x = 0.375
+      crop_node_2.rel_max_x = 0.62
+      crop_node_2.rel_min_y = 0.375
+      crop_node_2.rel_max_y = 0.62
+      crop_node_2.label = crop_node_2.name
+      crop_node_2.location = (200, -300)
 
       #link the nodes
       resize_shitter.links.new(input_node.outputs[0], output_node.inputs[0])
       resize_shitter.links.new(input_node.outputs[0], transform_node_1.inputs[0])
       resize_shitter.links.new(input_node.outputs[0], transform_node_2.inputs[0])
-      resize_shitter.links.new(transform_node_1.outputs[0], output_node.inputs[1])
-      resize_shitter.links.new(transform_node_2.outputs[0], output_node.inputs[2])
+      resize_shitter.links.new(transform_node_1.outputs[0], crop_node_1.inputs[0])
+      resize_shitter.links.new(transform_node_2.outputs[0], crop_node_2.inputs[0])
+      resize_shitter.links.new(crop_node_1.outputs[0], output_node.inputs[1])
+      resize_shitter.links.new(crop_node_2.outputs[0], output_node.inputs[2])
       
 
     # switch scene to destination and make sure nodes are allowed
