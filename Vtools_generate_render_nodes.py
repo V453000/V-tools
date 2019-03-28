@@ -162,9 +162,9 @@ class generate_render_nodes(bpy.types.Operator):
   )
   def execute(self, context):
     
-    log_filename = 'C:/Users/GFX-V/Desktop/log.txt'
+    #log_filename = 'C:/Users/GFX-V/Desktop/log.txt'
     # erase log file first
-    with open(log_filename, 'w'): pass
+    #with open(log_filename, 'w'): pass
     
     def log(text):
       # write into log file
