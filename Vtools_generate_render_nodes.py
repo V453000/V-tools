@@ -1164,7 +1164,12 @@ class generate_render_nodes(bpy.types.Operator):
 
       log('-> Finished processing ' + render_layer_name)
       log('---------------------------------------------')
-
+    
+    # update the node groups
+    for node_group_name in node_group_list:
+      log('Updated ' + node_group_name)
+      bpy.context.scene.node_tree.nodes[node_group_name].update()
+    bpy.context.scene.update()
     return {'FINISHED'}
 
 
