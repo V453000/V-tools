@@ -191,7 +191,7 @@ class generate_render_nodes(bpy.types.Operator):
         resizer_node.node_tree = bpy.data.node_groups['ResizeShitter']
         resizer_node.name = output_node.name + '-ResizeShitter'
         resizer_node.label = resizer_node.name
-        if render_layer_is_shadow == False:
+        if render_layer_is_shadow == False and render_layer_is_height == False and render_layer_is_normal == False:
           resizer_node.location = average_node_location
         else:
           resizer_node.location = (link.from_node.location[0], average_node_location[1])
@@ -231,8 +231,8 @@ class generate_render_nodes(bpy.types.Operator):
           resizer_output_base_path_half    = '//OUTPUT_PREVIEW'
           resizer_output_base_path_quarter = '//OUTPUT_PREVIEW'
         else:
-          resizer_output_base_path_half    = output_base_path_first_half + '_' + to_half_res    + output_base_path_second_half + '/' + bpy.context.scene.name +  output_render_layer_name
-          resizer_output_base_path_quarter = output_base_path_first_half + '_' + to_quarter_res + output_base_path_second_half + '/' + bpy.context.scene.name +  output_render_layer_name
+          resizer_output_base_path_half    = output_base_path_first_half + '_' + to_half_res    + output_base_path_second_half + '/' + bpy.context.scene.name + '_' +  output_render_layer_name
+          resizer_output_base_path_quarter = output_base_path_first_half + '_' + to_quarter_res + output_base_path_second_half + '/' + bpy.context.scene.name + '_' +  output_render_layer_name
 
         # handle PreviewShitter outputs for FILENAME (file_slot)
         if link.from_node.name[-14:] == 'PreviewShitter':
@@ -1113,7 +1113,40 @@ class generate_render_nodes(bpy.types.Operator):
         log('-> Finished processing ' + render_layer_name)
         log('---------------------------------------------')
         continue
+      
+      if render_layer_is_height and self.height_identifier_use != 'OFF':
+        height_alpha_over_black_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeAlphaOver')
+        height_alpha_over_black_node.name = render_layer_name + '-Alpha-Over-Black'
+        height_alpha_over_black_node.label = height_alpha_over_black_node.name
+        height_alpha_over_black_node.location = ( input_node.location[0] + x_multiplier, input_node.location[1] -262 )
+        height_alpha_over_black_node.width = x_multiplier - 30
+        height_alpha_over_black_node.inputs[1].default_value = (0, 0, 0, 1)
 
+        bpy.context.scene.node_tree.links.new(input_node.outputs[0], height_alpha_over_black_node.inputs[2])
+        bpy.context.scene.node_tree.links.new(height_alpha_over_black_node.outputs[0], output_node.inputs[0])
+
+        if self.resizer_use != 'OFF':
+          insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow, self.resizer_use)
+        log('-> Finished processing ' + render_layer_name)
+        log('---------------------------------------------')
+        continue
+
+      if render_layer_is_normal and self.normal_identifier_use != 'OFF':
+        normal_alpha_over_black_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeAlphaOver')
+        normal_alpha_over_black_node.name = render_layer_name + '-Alpha-Over-Black'
+        normal_alpha_over_black_node.label = normal_alpha_over_black_node.name
+        normal_alpha_over_black_node.location = ( input_node.location[0] + x_multiplier, input_node.location[1] -262 )
+        normal_alpha_over_black_node.width = x_multiplier - 30
+        normal_alpha_over_black_node.inputs[1].default_value = (0, 0, 0, 1)
+
+        bpy.context.scene.node_tree.links.new(input_node.outputs[0], normal_alpha_over_black_node.inputs[2])
+        bpy.context.scene.node_tree.links.new(normal_alpha_over_black_node.outputs[0], output_node.inputs[0])
+
+        if self.resizer_use != 'OFF':
+          insert_resizer(output_node, x_multiplier, output_folder, render_layer_name, preview_group_name, render_layer_is_shadow, self.resizer_use)
+        log('-> Finished processing ' + render_layer_name)
+        log('---------------------------------------------')
+        continue
 
       # link the nodes
       bpy.context.screen.scene.node_tree.links.new(input_node.outputs[0], output_node.inputs[0])
