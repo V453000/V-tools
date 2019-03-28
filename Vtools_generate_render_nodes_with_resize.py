@@ -11,12 +11,12 @@ class generate_render_nodes_with_resize(bpy.types.Operator):
     name = 'Resizer',
     description = 'Choose whether ResizeShitter automatically downscales the outputs.',
     items = [
-      #identifier   #name       #desc  #icon             #ID
-      ('OFF'      , 'OFF'       ,'' , 'PANEL_CLOSE'     , 0),
-      ('50%'      , '50%'       ,'' , 'SCENE'           , 1),
-      ('50% & 25%', '50% & 25%' ,'' , 'CAMERA_STEREO'   , 2)
+      #identifier     #name             #desc  #icon             #ID
+      ('OFF'         , 'OFF'           ,'' , 'PANEL_CLOSE'     , 0),
+      ('ONLY PREVIEW', 'ONLY PREVIEW'  ,'' , 'FILE_TICK'       , 1),
+      ('ALL OUTPUTS' , 'ALL OUTPUTS'   ,'' , 'SCENE'           , 2)
     ],
-   default = '50% & 25%'
+    default = 'ONLY PREVIEW'
   )
   previewer_use = bpy.props.EnumProperty(
     name = 'Use Previewer',
