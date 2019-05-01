@@ -3,7 +3,6 @@ import os
 import collections
 
 LinkList = collections.namedtuple('LinkList', ['from_node', 'to_node', 'from_socket', 'to_socket'])
-node_group_list = []
 
 class generate_render_nodes(bpy.types.Operator):
   '''Generate Render Nodes from RenderLayers.'''
@@ -193,7 +192,6 @@ class generate_render_nodes(bpy.types.Operator):
           resizer_node.node_tree = bpy.data.node_groups['ResizeShitter']
           resizer_node.name = output_node.name + '-ResizeShitter'
           resizer_node.label = resizer_node.name
-          node_group_list.append(resizer_node.name)
           if render_layer_is_shadow == False and render_layer_is_height == False and render_layer_is_normal == False:
             resizer_node.location = average_node_location
           else:
@@ -997,7 +995,6 @@ class generate_render_nodes(bpy.types.Operator):
         preview_shitter_node.node_tree = bpy.data.node_groups['PreviewShitter']
         preview_shitter_node.name = preview_shitter_node_name
         preview_shitter_node.label = preview_shitter_node.name
-        node_group_list.append(preview_shitter_node.name)
         preview_shitter_node.location = (x_count*x_multiplier, y_count*y_multiplier)
         preview_shitter_node.width = x_multiplier-30
         x_count += 2
@@ -1083,7 +1080,6 @@ class generate_render_nodes(bpy.types.Operator):
         shadow_shitter.node_tree = bpy.data.node_groups['ShadowShitter']
         shadow_shitter.name = render_layer_name + '-ShadowShitter'
         shadow_shitter.label = shadow_shitter.name
-        node_group_list.append(shadow_shitter.name)
         #bpy.context.scene.node_tree.links.new(input_node.outputs[3], output_node.inputs[0])
         x_count += 1
         y_count -= 0.50
@@ -1165,11 +1161,6 @@ class generate_render_nodes(bpy.types.Operator):
       log('-> Finished processing ' + render_layer_name)
       log('---------------------------------------------')
     
-    # update the node groups
-    for node_group_name in node_group_list:
-      log('Updated ' + node_group_name)
-      bpy.context.scene.node_tree.nodes[node_group_name].update()
-    bpy.context.scene.update()
     return {'FINISHED'}
 
 
