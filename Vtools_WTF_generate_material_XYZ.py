@@ -13,6 +13,10 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
   name = 'Scale',
   default = 32
   )
+  XYZ_cropscale = bpy.props.FloatProperty(
+  name = 'Crop Scale',
+  default = 1
+  )
   XYZ_groundheight = bpy.props.FloatProperty(
   name = 'Ground Height',
   default = 0
@@ -24,7 +28,7 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
 
   def execute(self, context):
 
-    def generate_xyz_material(XYZ_scale, XYZ_groundheight, XYZ_groundheight_from_selected):
+    def generate_xyz_material(XYZ_scale, XYZ_cropscale, XYZ_groundheight, XYZ_groundheight_from_selected):
       # check if XYZmap material exists
       if bpy.data.materials.get('XYZmap') is None:
         # create XYZmap material
@@ -254,7 +258,7 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
     # ------------------------------------------------------------------------------------------------------------
 
     # generate the XYZ materials with correct coordinates based on camera
-    generate_xyz_material(self.XYZ_wtfscale, self.XYZ_groundheight, self.XYZ_groundheight_from_selected)
+    generate_xyz_material(self.XYZ_wtfscale, self.XYZ_cropscale, self.XYZ_groundheight, self.XYZ_groundheight_from_selected)
 
 
 

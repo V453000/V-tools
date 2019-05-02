@@ -36,12 +36,13 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
       scene.render.use_overwrite = False
       scene.render.use_placeholder = True
 
-    # setting for XYZ scale
+    # check if the XYZ settings group exists
     if bpy.data.node_groups.get('XYZ-settings') is None:
       settings_group = bpy.data.node_groups.new(name = 'XYZ-settings', type = 'ShaderNodeTree')
     else:
       settings_group = bpy.data.node_groups['XYZ-settings']
     
+    # setting for XYZ scale
     if settings_group.nodes.get('XYZ-settings-scale') is None:
       settings_scale_node = settings_group.nodes.new('ShaderNodeValue')
       settings_scale_node.name =  'XYZ-settings-scale'
@@ -49,6 +50,16 @@ class WTF_scene_settings_XYZ(bpy.types.Operator):
       settings_scale_node.outputs[0].default_value = 128
     else:
       settings_scale_node = settings_group.nodes['XYZ-settings-scale']
+    
+    # setting for XYZ cropscale
+    if settings_group.nodes.get('XYZ-settings-cropscale') is None:
+      settings_cropscale_node = settings_group.nodes.new('ShaderNodeValue')
+      settings_cropscale_node.name =  'XYZ-settings-cropscale'
+      settings_cropscale_node.label = 'XYZ-settings-cropscale'
+      settings_cropscale_node.outputs[0].default_value = 1
+      settings_cropscale_node.location = (0, -100)
+    else:
+      settings_cropscale_node = settings_group.nodes['XYZ-settings-cropscale']
     
     # setting for material override
     if settings_group.nodes.get('XYZ-settings-material-override') is None:
