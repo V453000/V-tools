@@ -106,7 +106,10 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       camera_rotation   = bpy.context.scene.camera.matrix_world.to_euler()
       zero_camera_vector = mathutils.Vector((0,0,1))
       camera_vector = camera_position_3x3 * zero_camera_vector
-      camera_vector_1z = mathutils.Vector((camera_vector[0]/camera_vector[2],camera_vector[1]/camera_vector[2],camera_vector[2]/camera_vector[2]))
+      camera_vector_1z = mathutils.Vector(
+                            (camera_vector[0]/camera_vector[2],
+                             camera_vector[1]/camera_vector[2],
+                             camera_vector[2]/camera_vector[2]))
       camera_ground_target = camera_position - ( camera_vector * (camera_position[2] / camera_vector[2]))
       cam_offset = camera_ground_target
       #height_offset = bpy.context.scene.objects['HEIGHT'].location[2]
@@ -159,17 +162,17 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
         xyz_mapping_node.translation = (XYZ_scale*o[0] - cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset,
                                         XYZ_scale*o[1] - cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset,
                                         XYZ_scale*o[2] - cam_offset[2]*o[2] + height_offset)
-        xyz_cropscale_translation_x = (XYZ_cropscale*cam_orthographic_scale*o[0] - cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset) /2
-        xyz_cropscale_translation_y = ((XYZ_cropscale*cam_orthographic_scale*o[1] - cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset) /2 *sqrt2 ) + cam_orthographic_scale/2
-        xyz_cropscale_translation_z = (XYZ_cropscale*cam_orthographic_scale*o[2] - cam_offset[2]*o[2] + height_offset) /2
+        xyz_cropscale_translation_x =  cam_orthographic_scale*o[0] - cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset + cam_orthographic_scale/2
+        xyz_cropscale_translation_y =  (cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset) + cam_orthographic_scale*o[1]*sqrt2/2
+        xyz_cropscale_translation_z =  0
         xyz_cropscale_mapping_node.translation = (xyz_cropscale_translation_x,
                                                   xyz_cropscale_translation_y,
                                                   xyz_cropscale_translation_z)           
         xyz_cropscale_mapping_node.rotation[0] = (pi/4)        
-        #print('cam_offset[0]*o[0]', cam_offset[0]*o[0] )
-        #print('cam_offset[1]*o[1]', cam_offset[1]*o[1] )
-        #print('camera_vector_1z[0]*height_offset', camera_vector_1z[0]*height_offset )
-        #print('camera_vector_1z[1]*height_offset', camera_vector_1z[1]*height_offset )
+        print('cam_offset[0]*o[0]', cam_offset[0]*o[0] )
+        print('cam_offset[1]*o[1]', cam_offset[1]*o[1] )
+        print('camera_vector_1z[0]*height_offset', camera_vector_1z[0]*height_offset )
+        print('camera_vector_1z[1]*height_offset', camera_vector_1z[1]*height_offset )
         xyz_mapping_node.rotation[2] = 0
         print('0')
 
