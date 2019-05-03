@@ -2,6 +2,7 @@ import bpy
 import mathutils
 import math
 pi = math.pi
+sqrt2 = 1.414213562373095
 
 class WTF_generate_material_XYZ(bpy.types.Operator):
   '''Generates the XYZmap material.'''
@@ -159,11 +160,12 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
                                         XYZ_scale*o[1] - cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset,
                                         XYZ_scale*o[2] - cam_offset[2]*o[2] + height_offset)
         xyz_cropscale_translation_x = (XYZ_cropscale*cam_orthographic_scale*o[0] - cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset) /2
-        xyz_cropscale_translation_y = (XYZ_cropscale*cam_orthographic_scale*o[1] - cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset) /2 *1.41
+        xyz_cropscale_translation_y = ((XYZ_cropscale*cam_orthographic_scale*o[1] - cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset) /2 *sqrt2 ) + cam_orthographic_scale/2
         xyz_cropscale_translation_z = (XYZ_cropscale*cam_orthographic_scale*o[2] - cam_offset[2]*o[2] + height_offset) /2
         xyz_cropscale_mapping_node.translation = (xyz_cropscale_translation_x,
                                                   xyz_cropscale_translation_y,
-                                                  xyz_cropscale_translation_z)                   
+                                                  xyz_cropscale_translation_z)           
+        xyz_cropscale_mapping_node.rotation[0] = (pi/4)        
         #print('cam_offset[0]*o[0]', cam_offset[0]*o[0] )
         #print('cam_offset[1]*o[1]', cam_offset[1]*o[1] )
         #print('camera_vector_1z[0]*height_offset', camera_vector_1z[0]*height_offset )
@@ -178,7 +180,7 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
                                         XYZ_scale*o[1] - cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset,
                                         XYZ_scale*o[2] - cam_offset[2]*o[2] + height_offset)
         xyz_cropscale_translation_x = (XYZ_cropscale*cam_orthographic_scale*o[0] + cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset) /2
-        xyz_cropscale_translation_y = (XYZ_cropscale*cam_orthographic_scale*o[1] - cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset) /2 *1.41
+        xyz_cropscale_translation_y = (XYZ_cropscale*cam_orthographic_scale*o[1] - cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset) /2 *sqrt2
         xyz_cropscale_translation_z = (XYZ_cropscale*cam_orthographic_scale*o[2] - cam_offset[2]*o[2] + height_offset) /2
         xyz_cropscale_mapping_node.translation = (xyz_cropscale_translation_x,
                                                   xyz_cropscale_translation_y,
@@ -193,7 +195,7 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
                                         XYZ_scale*o[1] + cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset,
                                         XYZ_scale*o[2] - cam_offset[2]*o[2] + height_offset)
         xyz_cropscale_translation_x = (XYZ_cropscale*cam_orthographic_scale*o[0] + cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset) /2
-        xyz_cropscale_translation_y = (XYZ_cropscale*cam_orthographic_scale*o[1] + cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset) /2 *1.41
+        xyz_cropscale_translation_y = (XYZ_cropscale*cam_orthographic_scale*o[1] + cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset) /2 *sqrt2
         xyz_cropscale_translation_z = (XYZ_cropscale*cam_orthographic_scale*o[2] - cam_offset[2]*o[2] + height_offset) /2
         xyz_cropscale_mapping_node.translation = (xyz_cropscale_translation_x,
                                                   xyz_cropscale_translation_y,
@@ -208,7 +210,7 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
                                         XYZ_scale*o[1] + cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset,
                                         XYZ_scale*o[2] - cam_offset[2]*o[2] + height_offset)
         xyz_cropscale_translation_x = (XYZ_cropscale*cam_orthographic_scale*o[0] - cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset) /2
-        xyz_cropscale_translation_y = (XYZ_cropscale*cam_orthographic_scale*o[1] + cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset) /2 *1.41
+        xyz_cropscale_translation_y = (XYZ_cropscale*cam_orthographic_scale*o[1] + cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset) /2 *sqrt2
         xyz_cropscale_translation_z = (XYZ_cropscale*cam_orthographic_scale*o[2] - cam_offset[2]*o[2] + height_offset) /2
         xyz_cropscale_mapping_node.translation = (xyz_cropscale_translation_x,
                                                   xyz_cropscale_translation_y,
@@ -217,7 +219,7 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
         print('-1')
 
       xyz_cropscale_mapping_node.scale[0] = XYZ_cropscale*cam_orthographic_scale
-      xyz_cropscale_mapping_node.scale[1] = XYZ_cropscale*cam_orthographic_scale*1.41
+      xyz_cropscale_mapping_node.scale[1] = XYZ_cropscale*cam_orthographic_scale
       xyz_cropscale_mapping_node.scale[2] = XYZ_cropscale*cam_orthographic_scale
 
       loc_x += 400
@@ -227,18 +229,22 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       loc_y+=300
       xyz_cropscale_x_greater_node = xyz_group_nodes.new('ShaderNodeMath')
       xyz_cropscale_x_greater_node.operation = 'GREATER_THAN'
+      xyz_cropscale_x_greater_node.inputs[1].default_value = 0
       xyz_cropscale_x_greater_node.location = (loc_x, loc_y)
       loc_y-=200
       xyz_cropscale_x_less_node = xyz_group_nodes.new('ShaderNodeMath')
       xyz_cropscale_x_less_node.operation = 'LESS_THAN'
+      xyz_cropscale_x_less_node.inputs[1].default_value = 1
       xyz_cropscale_x_less_node.location = (loc_x, loc_y)
       loc_y-=200
       xyz_cropscale_y_greater_node = xyz_group_nodes.new('ShaderNodeMath')
       xyz_cropscale_y_greater_node.operation = 'GREATER_THAN'
+      xyz_cropscale_y_greater_node.inputs[1].default_value = 0
       xyz_cropscale_y_greater_node.location = (loc_x, loc_y)
       loc_y-=200
       xyz_cropscale_y_less_node = xyz_group_nodes.new('ShaderNodeMath')
       xyz_cropscale_y_less_node.operation = 'LESS_THAN'
+      xyz_cropscale_y_less_node.inputs[1].default_value = 1
       xyz_cropscale_y_less_node.location = (loc_x, loc_y)
       loc_x+=200
       loc_y+=500
@@ -303,13 +309,28 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       xyz_output_node.location = (loc_x, loc_y)
 
       # add links
-      xyz_group_links.new(xyz_geometry_node.outputs['Position'], xyz_mapping_node.inputs[0])
-      xyz_group_links.new(xyz_mapping_node.outputs[0], xyz_emission_node.inputs[0])
-      xyz_group_links.new(xyz_emission_node.outputs[0], xyz_mix_transparency_node.inputs[1])
-      xyz_group_links.new(xyz_transparent_node.outputs[0], xyz_mix_transparency_node.inputs[2])
-      xyz_group_links.new(xyz_group_input_node.outputs[0], xyz_less_than_node.inputs[0])
-      xyz_group_links.new(xyz_less_than_node.outputs[0], xyz_mix_transparency_node.inputs[0])
-      xyz_group_links.new(xyz_mix_transparency_node.outputs[0], xyz_group_output_node.inputs[0])
+      xyz_group_links.new( xyz_geometry_node.outputs['Position'],            xyz_mapping_node.inputs[0]               )
+      xyz_group_links.new( xyz_mapping_node.outputs[0],                      xyz_emission_node.inputs[0]              )
+      xyz_group_links.new( xyz_emission_node.outputs[0],                     xyz_mix_transparency_node.inputs[1]      )
+      xyz_group_links.new( xyz_transparent_node.outputs[0],                  xyz_mix_transparency_node.inputs[2]      )
+      xyz_group_links.new( xyz_group_input_node.outputs[0],                  xyz_less_than_node.inputs[0]             )
+      xyz_group_links.new( xyz_less_than_node.outputs[0],                    xyz_mix_transparency_node.inputs[0]      )
+      xyz_group_links.new( xyz_mix_transparency_node.outputs[0],             xyz_cropscale_mix_node.inputs[2]         )
+      xyz_group_links.new( xyz_cropscale_mix_node.outputs[0],                xyz_group_output_node.inputs[0]          )
+      xyz_group_links.new( xyz_cropscale_geometry_node.outputs['Position'],  xyz_cropscale_mapping_node.inputs[0]     )
+      xyz_group_links.new( xyz_cropscale_mapping_node.outputs[0],            xyz_cropscale_separateXYZ_node.inputs[0] )
+      xyz_group_links.new( xyz_cropscale_separateXYZ_node.outputs[0],        xyz_cropscale_x_greater_node.inputs[0]   )
+      xyz_group_links.new( xyz_cropscale_separateXYZ_node.outputs[0],        xyz_cropscale_x_less_node.inputs[0]      )
+      xyz_group_links.new( xyz_cropscale_separateXYZ_node.outputs[1],        xyz_cropscale_y_greater_node.inputs[0]   )
+      xyz_group_links.new( xyz_cropscale_separateXYZ_node.outputs[1],        xyz_cropscale_y_less_node.inputs[0]      )
+      xyz_group_links.new( xyz_cropscale_x_greater_node.outputs[0],          xyz_cropscale_x_multiply_node.inputs[0]  )
+      xyz_group_links.new( xyz_cropscale_x_less_node.outputs[0],             xyz_cropscale_x_multiply_node.inputs[1]  )
+      xyz_group_links.new( xyz_cropscale_y_greater_node.outputs[0],          xyz_cropscale_y_multiply_node.inputs[0]  )
+      xyz_group_links.new( xyz_cropscale_y_less_node.outputs[0],             xyz_cropscale_y_multiply_node.inputs[1]  )
+      xyz_group_links.new( xyz_cropscale_x_multiply_node.outputs[0],         xyz_cropscale_xy_multiply_node.inputs[0] )
+      xyz_group_links.new( xyz_cropscale_y_multiply_node.outputs[0],         xyz_cropscale_xy_multiply_node.inputs[1] )
+      xyz_group_links.new( xyz_cropscale_xy_multiply_node.outputs[0],        xyz_cropscale_mix_node.inputs[0]         )
+      xyz_group_links.new( xyz_cropscale_transparent_node.outputs[0],        xyz_cropscale_mix_node.inputs[1]         )
       # add links in xyz_material
       xyz_material_links.new(xyz_group_in_material.outputs[0], xyz_output_node.inputs[0])
 
