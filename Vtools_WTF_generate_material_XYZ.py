@@ -154,6 +154,7 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
       xyz_cropscale_mapping_node.location = (loc_x, loc_y)
       #loc_x += 400
 
+      print('CAM GROUND TARGET', camera_ground_target)
       #XYZ_scale = self.XYZ_scale
       offset_vector = (1,1,1)
       if texture_z_rot_int == 0:
@@ -162,17 +163,13 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
         xyz_mapping_node.translation = (XYZ_scale*o[0] - cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset,
                                         XYZ_scale*o[1] - cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset,
                                         XYZ_scale*o[2] - cam_offset[2]*o[2] + height_offset)
-        xyz_cropscale_translation_x =  cam_orthographic_scale*o[0] - cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset + cam_orthographic_scale/2
-        xyz_cropscale_translation_y =  (cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset) + cam_orthographic_scale*o[1]*sqrt2/2
-        xyz_cropscale_translation_z =  0
+        xyz_cropscale_translation_x =  camera_ground_target[0] -(cam_orthographic_scale/2)        + camera_vector_1z[0]*height_offset
+        xyz_cropscale_translation_y =  camera_ground_target[1] -(cam_orthographic_scale/2*sqrt2)  + camera_vector_1z[1]*height_offset
+        xyz_cropscale_translation_z =  height_offset
         xyz_cropscale_mapping_node.translation = (xyz_cropscale_translation_x,
                                                   xyz_cropscale_translation_y,
                                                   xyz_cropscale_translation_z)           
         xyz_cropscale_mapping_node.rotation[0] = (pi/4)        
-        print('cam_offset[0]*o[0]', cam_offset[0]*o[0] )
-        print('cam_offset[1]*o[1]', cam_offset[1]*o[1] )
-        print('camera_vector_1z[0]*height_offset', camera_vector_1z[0]*height_offset )
-        print('camera_vector_1z[1]*height_offset', camera_vector_1z[1]*height_offset )
         xyz_mapping_node.rotation[2] = 0
         print('0')
 
@@ -182,9 +179,9 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
         xyz_mapping_node.translation = (XYZ_scale*o[0] + cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset,
                                         XYZ_scale*o[1] - cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset,
                                         XYZ_scale*o[2] - cam_offset[2]*o[2] + height_offset)
-        xyz_cropscale_translation_x =  (cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset) - cam_orthographic_scale*o[0]*sqrt2/2
-        xyz_cropscale_translation_y =  cam_orthographic_scale*o[1] - cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset + cam_orthographic_scale/2
-        xyz_cropscale_translation_z =  0
+        xyz_cropscale_translation_x =  camera_ground_target[0] -(cam_orthographic_scale/2*sqrt2)        + camera_vector_1z[0]*height_offset
+        xyz_cropscale_translation_y =  camera_ground_target[1] -(cam_orthographic_scale/2)              + camera_vector_1z[1]*height_offset
+        xyz_cropscale_translation_z =  height_offset
         xyz_cropscale_mapping_node.translation = (xyz_cropscale_translation_x,
                                                   xyz_cropscale_translation_y,
                                                   xyz_cropscale_translation_z)
@@ -198,9 +195,9 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
         xyz_mapping_node.translation = (XYZ_scale*o[0] + cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset,
                                         XYZ_scale*o[1] + cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset,
                                         XYZ_scale*o[2] - cam_offset[2]*o[2] + height_offset)
-        xyz_cropscale_translation_x =  cam_orthographic_scale*o[0] - cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset - cam_orthographic_scale*1.5
-        xyz_cropscale_translation_y =  (cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset) - cam_orthographic_scale*o[1]*sqrt2/2
-        xyz_cropscale_translation_z =  0
+        xyz_cropscale_translation_x =  camera_ground_target[0] -(cam_orthographic_scale/2)        + camera_vector_1z[0]*height_offset
+        xyz_cropscale_translation_y =  camera_ground_target[1] -(cam_orthographic_scale/2*sqrt2)  + camera_vector_1z[1]*height_offset
+        xyz_cropscale_translation_z =  height_offset
         xyz_cropscale_mapping_node.translation = (xyz_cropscale_translation_x,
                                                   xyz_cropscale_translation_y,
                                                   xyz_cropscale_translation_z)
@@ -214,9 +211,9 @@ class WTF_generate_material_XYZ(bpy.types.Operator):
         xyz_mapping_node.translation = (XYZ_scale*o[0] - cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset,
                                         XYZ_scale*o[1] + cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset,
                                         XYZ_scale*o[2] - cam_offset[2]*o[2] + height_offset)
-        xyz_cropscale_translation_x =  (-cam_offset[0]*o[0] + camera_vector_1z[0]*height_offset) + cam_orthographic_scale*o[0]*sqrt2/2
-        xyz_cropscale_translation_y =  cam_orthographic_scale*o[1] + cam_offset[1]*o[1] + camera_vector_1z[1]*height_offset - cam_orthographic_scale*1.5
-        xyz_cropscale_translation_z =  0
+        xyz_cropscale_translation_x =  camera_ground_target[0] -(cam_orthographic_scale/2*sqrt2)        + camera_vector_1z[0]*height_offset
+        xyz_cropscale_translation_y =  camera_ground_target[1] -(cam_orthographic_scale/2)              + camera_vector_1z[1]*height_offset
+        xyz_cropscale_translation_z =  height_offset
         xyz_cropscale_mapping_node.translation = (xyz_cropscale_translation_x,
                                                   xyz_cropscale_translation_y,
                                                   xyz_cropscale_translation_z)
