@@ -36,7 +36,7 @@ class WTF_render_Normal(bpy.types.Operator):
       original_transmission_bounces = bpy.context.scene.cycles.transmission_bounces
       original_volume_bounces = bpy.context.scene.cycles.volume_bounces
       # resolution
-      resolution_multiplier = 2
+      resolution_multiplier = 1
       #resolution_percentage = bpy.context.scene.render.resolution_percentage
       #bpy.context.scene.render.resolution_percentage = resolution_percentage*resolution_multiplier
       original_resolution_x = bpy.context.scene.render.resolution_x
@@ -46,7 +46,7 @@ class WTF_render_Normal(bpy.types.Operator):
 
         
 
-      bpy.context.scene.cycles.samples = 576
+      bpy.context.scene.cycles.samples = 1000
       bpy.context.scene.cycles.max_bounces = 0
       bpy.context.scene.cycles.min_bounces = 0
       bpy.context.scene.cycles.diffuse_bounces = 0
